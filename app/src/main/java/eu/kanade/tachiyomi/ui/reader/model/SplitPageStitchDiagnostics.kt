@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-data class SplitPageMergeDiagnostics(
-    val merges: Boolean,
+data class SplitPageStitchDiagnostics(
+    val stitches: Boolean,
     val reason: Reason,
     val firstWidth: Int,
     val firstHeight: Int,
@@ -21,7 +21,7 @@ data class SplitPageMergeDiagnostics(
     val sampleRows: Int,
 ) {
     enum class Reason {
-        MERGED,
+        STITCHED,
         INVALID_SIZE,
         WIDTH_MISMATCH,
         COMBINED_IMAGE_TOO_TALL,

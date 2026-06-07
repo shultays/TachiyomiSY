@@ -381,18 +381,18 @@
     <string name="center_margin_double_and_wide_page">Add to both</string>
     <string name="pref_center_margin">Center margin type</string>
     <string name="pref_center_margin_summary">Insert spacer to accommodate deadspace on foldable devices.</string>
-    <string name="pref_merge_split_pages">Merge split pages</string>
-    <string name="merge_split_pages_none">None</string>
-    <string name="merge_split_pages_several">Several images</string>
-    <string name="merge_split_pages_threshold">Merge threshold (higher merges more)</string>
-    <string name="merge_split_pages_max_height_ratio">Maximum combined height ratio</string>
-    <string name="merge_split_pages_minimum_edge_variance">Minimum edge variance</string>
-    <string name="merge_split_pages_continuity_multiplier">Continuity multiplier</string>
-    <string name="merge_split_pages_minimum_continuity">Minimum continuity allowance</string>
-    <string name="merge_split_pages_sample_columns">Sample columns</string>
-    <string name="merge_split_pages_sample_rows">Sample rows</string>
-    <string name="merge_split_pages_diagnostics">Current page diagnostics</string>
-    <string name="merge_split_pages_diagnostics_waiting">Waiting for the current page and next page to be analyzed.</string>
+    <string name="pref_stitch_split_pages">Stitch split pages</string>
+    <string name="stitch_split_pages_none">None</string>
+    <string name="stitch_split_pages_several">Several images</string>
+    <string name="stitch_split_pages_threshold">Stitch threshold (higher stitches more)</string>
+    <string name="stitch_split_pages_max_height_ratio">Maximum combined height ratio</string>
+    <string name="stitch_split_pages_minimum_edge_variance">Minimum edge variance</string>
+    <string name="stitch_split_pages_continuity_multiplier">Continuity multiplier</string>
+    <string name="stitch_split_pages_minimum_continuity">Minimum continuity allowance</string>
+    <string name="stitch_split_pages_sample_columns">Sample columns</string>
+    <string name="stitch_split_pages_sample_rows">Sample rows</string>
+    <string name="stitch_split_pages_diagnostics">Current page diagnostics</string>
+    <string name="stitch_split_pages_diagnostics_waiting">Waiting for the current page and next page to be analyzed.</string>
 
     <!-- Archive reader mode -->
     <string name="archive_mode_load_from_file">Load from file</string>

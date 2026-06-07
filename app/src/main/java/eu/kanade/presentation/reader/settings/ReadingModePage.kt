@@ -183,90 +183,90 @@ private fun ColumnScope.PagerViewerSettings(
         }
     }
 
-    val splitPageMergeMode by screenModel.preferences.splitPageMergeMode.collectAsState()
-    SettingsChipRow(SYMR.strings.pref_merge_split_pages) {
-        ReaderPreferences.SplitPageMergeModes.mapIndexed { index, it ->
+    val splitPageStitchMode by screenModel.preferences.splitPageStitchMode.collectAsState()
+    SettingsChipRow(SYMR.strings.pref_stitch_split_pages) {
+        ReaderPreferences.SplitPageStitchModes.mapIndexed { index, it ->
             FilterChip(
-                selected = PagerConfig.SplitPageMergeMode.normalize(splitPageMergeMode) == index,
-                onClick = { screenModel.preferences.splitPageMergeMode.set(index) },
+                selected = PagerConfig.SplitPageStitchMode.normalize(splitPageStitchMode) == index,
+                onClick = { screenModel.preferences.splitPageStitchMode.set(index) },
                 label = { Text(stringResource(it)) },
             )
         }
     }
 
-    if (PagerConfig.SplitPageMergeMode.normalize(splitPageMergeMode) != PagerConfig.SplitPageMergeMode.NONE) {
-        val splitPageMergeThreshold by screenModel.preferences.splitPageMergeThreshold.collectAsState()
+    if (PagerConfig.SplitPageStitchMode.normalize(splitPageStitchMode) != PagerConfig.SplitPageStitchMode.NONE) {
+        val splitPageStitchThreshold by screenModel.preferences.splitPageStitchThreshold.collectAsState()
         SliderItem(
-            value = splitPageMergeThreshold,
-            valueRange = PagerConfig.SplitPageMergeThreshold.MIN..PagerConfig.SplitPageMergeThreshold.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_threshold),
-            valueString = "$splitPageMergeThreshold%",
-            onChange = screenModel.preferences.splitPageMergeThreshold::set,
+            value = splitPageStitchThreshold,
+            valueRange = PagerConfig.SplitPageStitchThreshold.MIN..PagerConfig.SplitPageStitchThreshold.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_threshold),
+            valueString = "$splitPageStitchThreshold%",
+            onChange = screenModel.preferences.splitPageStitchThreshold::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageMergeMaxHeightRatio by screenModel.preferences.splitPageMergeMaxHeightRatio.collectAsState()
+        val splitPageStitchMaxHeightRatio by screenModel.preferences.splitPageStitchMaxHeightRatio.collectAsState()
         SliderItem(
-            value = splitPageMergeMaxHeightRatio,
-            valueRange = PagerConfig.SplitPageMergeMaxHeightRatio.MIN..PagerConfig.SplitPageMergeMaxHeightRatio.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_max_height_ratio),
-            valueString = "%.2f".format(splitPageMergeMaxHeightRatio / 100f),
-            onChange = screenModel.preferences.splitPageMergeMaxHeightRatio::set,
+            value = splitPageStitchMaxHeightRatio,
+            valueRange = PagerConfig.SplitPageStitchMaxHeightRatio.MIN..PagerConfig.SplitPageStitchMaxHeightRatio.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_max_height_ratio),
+            valueString = "%.2f".format(splitPageStitchMaxHeightRatio / 100f),
+            onChange = screenModel.preferences.splitPageStitchMaxHeightRatio::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageMergeMinimumEdgeVariance by screenModel.preferences.splitPageMergeMinimumEdgeVariance.collectAsState()
+        val splitPageStitchMinimumEdgeVariance by screenModel.preferences.splitPageStitchMinimumEdgeVariance.collectAsState()
         SliderItem(
-            value = splitPageMergeMinimumEdgeVariance,
-            valueRange = PagerConfig.SplitPageMergeMinimumEdgeVariance.MIN..PagerConfig.SplitPageMergeMinimumEdgeVariance.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_minimum_edge_variance),
-            valueString = "%.1f%%".format(splitPageMergeMinimumEdgeVariance / 10f),
-            onChange = screenModel.preferences.splitPageMergeMinimumEdgeVariance::set,
+            value = splitPageStitchMinimumEdgeVariance,
+            valueRange = PagerConfig.SplitPageStitchMinimumEdgeVariance.MIN..PagerConfig.SplitPageStitchMinimumEdgeVariance.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_minimum_edge_variance),
+            valueString = "%.1f%%".format(splitPageStitchMinimumEdgeVariance / 10f),
+            onChange = screenModel.preferences.splitPageStitchMinimumEdgeVariance::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageMergeContinuityMultiplier by screenModel.preferences.splitPageMergeContinuityMultiplier.collectAsState()
+        val splitPageStitchContinuityMultiplier by screenModel.preferences.splitPageStitchContinuityMultiplier.collectAsState()
         SliderItem(
-            value = splitPageMergeContinuityMultiplier,
-            valueRange = PagerConfig.SplitPageMergeContinuityMultiplier.MIN..PagerConfig.SplitPageMergeContinuityMultiplier.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_continuity_multiplier),
-            valueString = "%.1fx".format(splitPageMergeContinuityMultiplier / 100f),
-            onChange = screenModel.preferences.splitPageMergeContinuityMultiplier::set,
+            value = splitPageStitchContinuityMultiplier,
+            valueRange = PagerConfig.SplitPageStitchContinuityMultiplier.MIN..PagerConfig.SplitPageStitchContinuityMultiplier.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_continuity_multiplier),
+            valueString = "%.1fx".format(splitPageStitchContinuityMultiplier / 100f),
+            onChange = screenModel.preferences.splitPageStitchContinuityMultiplier::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageMergeMinimumContinuity by screenModel.preferences.splitPageMergeMinimumContinuity.collectAsState()
+        val splitPageStitchMinimumContinuity by screenModel.preferences.splitPageStitchMinimumContinuity.collectAsState()
         SliderItem(
-            value = splitPageMergeMinimumContinuity,
-            valueRange = PagerConfig.SplitPageMergeMinimumContinuity.MIN..PagerConfig.SplitPageMergeMinimumContinuity.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_minimum_continuity),
-            valueString = "%.1f%%".format(splitPageMergeMinimumContinuity / 10f),
-            onChange = screenModel.preferences.splitPageMergeMinimumContinuity::set,
+            value = splitPageStitchMinimumContinuity,
+            valueRange = PagerConfig.SplitPageStitchMinimumContinuity.MIN..PagerConfig.SplitPageStitchMinimumContinuity.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_minimum_continuity),
+            valueString = "%.1f%%".format(splitPageStitchMinimumContinuity / 10f),
+            onChange = screenModel.preferences.splitPageStitchMinimumContinuity::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageMergeSampleColumns by screenModel.preferences.splitPageMergeSampleColumns.collectAsState()
+        val splitPageStitchSampleColumns by screenModel.preferences.splitPageStitchSampleColumns.collectAsState()
         SliderItem(
-            value = splitPageMergeSampleColumns,
-            valueRange = PagerConfig.SplitPageMergeSampleColumns.MIN..PagerConfig.SplitPageMergeSampleColumns.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_sample_columns),
-            onChange = screenModel.preferences.splitPageMergeSampleColumns::set,
+            value = splitPageStitchSampleColumns,
+            valueRange = PagerConfig.SplitPageStitchSampleColumns.MIN..PagerConfig.SplitPageStitchSampleColumns.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_sample_columns),
+            onChange = screenModel.preferences.splitPageStitchSampleColumns::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageMergeSampleRows by screenModel.preferences.splitPageMergeSampleRows.collectAsState()
+        val splitPageStitchSampleRows by screenModel.preferences.splitPageStitchSampleRows.collectAsState()
         SliderItem(
-            value = splitPageMergeSampleRows,
-            valueRange = PagerConfig.SplitPageMergeSampleRows.MIN..PagerConfig.SplitPageMergeSampleRows.MAX,
-            label = stringResource(SYMR.strings.merge_split_pages_sample_rows),
-            onChange = screenModel.preferences.splitPageMergeSampleRows::set,
+            value = splitPageStitchSampleRows,
+            valueRange = PagerConfig.SplitPageStitchSampleRows.MIN..PagerConfig.SplitPageStitchSampleRows.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_sample_rows),
+            onChange = screenModel.preferences.splitPageStitchSampleRows::set,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val diagnostics = viewer?.splitPageDiagnostics?.collectAsState()?.value
+        val diagnostics = viewer?.splitPageStitchDiagnostics?.collectAsState()?.value
         val diagnosticsText = diagnostics?.let {
             """
-            Decision: ${if (it.merges) "MERGE" else "REJECT"} (${it.reason.name})
+            Decision: ${if (it.stitches) "STITCH" else "REJECT"} (${it.reason.name})
             Samples: ${it.firstWidth}x${it.firstHeight} + ${it.secondWidth}x${it.secondHeight}
             Combined ratio: ${formatDiagnostic(it.combinedHeightRatio)} <= ${formatDiagnostic(it.maximumCombinedHeightRatio)}
             Seam difference: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.seamThreshold)}
@@ -276,10 +276,10 @@ private fun ColumnScope.PagerViewerSettings(
             Continuity settings: ${formatDiagnostic(it.continuityMultiplier)}x, minimum ${formatDiagnostic(it.minimumContinuity)}
             Sampling: ${it.sampleColumns} columns x ${it.sampleRows} rows
             """.trimIndent()
-        } ?: stringResource(SYMR.strings.merge_split_pages_diagnostics_waiting)
+        } ?: stringResource(SYMR.strings.stitch_split_pages_diagnostics_waiting)
 
         Text(
-            text = "${stringResource(SYMR.strings.merge_split_pages_diagnostics)}\n$diagnosticsText",
+            text = "${stringResource(SYMR.strings.stitch_split_pages_diagnostics)}\n$diagnosticsText",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )

@@ -217,29 +217,29 @@ class ReaderPreferences(
 
     val centerMarginType: Preference<Int> = preferenceStore.getInt("center_margin_type", PagerConfig.CenterMarginType.NONE)
 
-    val splitPageMergeMode: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_mode", PagerConfig.SplitPageMergeMode.NONE)
+    val splitPageStitchMode: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_mode", PagerConfig.SplitPageStitchMode.NONE)
 
-    val splitPageMergeThreshold: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_threshold", PagerConfig.SplitPageMergeThreshold.DEFAULT)
+    val splitPageStitchThreshold: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_threshold", PagerConfig.SplitPageStitchThreshold.DEFAULT)
 
-    val splitPageMergeMaxHeightRatio: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_max_height_ratio", PagerConfig.SplitPageMergeMaxHeightRatio.DEFAULT)
+    val splitPageStitchMaxHeightRatio: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_max_height_ratio", PagerConfig.SplitPageStitchMaxHeightRatio.DEFAULT)
 
-    val splitPageMergeMinimumEdgeVariance: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_minimum_edge_variance", PagerConfig.SplitPageMergeMinimumEdgeVariance.DEFAULT)
+    val splitPageStitchMinimumEdgeVariance: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_minimum_edge_variance", PagerConfig.SplitPageStitchMinimumEdgeVariance.DEFAULT)
 
-    val splitPageMergeContinuityMultiplier: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_continuity_multiplier", PagerConfig.SplitPageMergeContinuityMultiplier.DEFAULT)
+    val splitPageStitchContinuityMultiplier: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_continuity_multiplier", PagerConfig.SplitPageStitchContinuityMultiplier.DEFAULT)
 
-    val splitPageMergeMinimumContinuity: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_minimum_continuity", PagerConfig.SplitPageMergeMinimumContinuity.DEFAULT)
+    val splitPageStitchMinimumContinuity: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_minimum_continuity", PagerConfig.SplitPageStitchMinimumContinuity.DEFAULT)
 
-    val splitPageMergeSampleColumns: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_sample_columns", PagerConfig.SplitPageMergeSampleColumns.DEFAULT)
+    val splitPageStitchSampleColumns: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_sample_columns", PagerConfig.SplitPageStitchSampleColumns.DEFAULT)
 
-    val splitPageMergeSampleRows: Preference<Int> =
-        preferenceStore.getInt("split_page_merge_sample_rows", PagerConfig.SplitPageMergeSampleRows.DEFAULT)
+    val splitPageStitchSampleRows: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_sample_rows", PagerConfig.SplitPageStitchSampleRows.DEFAULT)
 
     val archiveReaderMode: Preference<Int> = preferenceStore.getInt("archive_reader_mode", ArchiveReaderMode.LOAD_FROM_FILE)
     // SY <--
@@ -338,9 +338,9 @@ class ReaderPreferences(
             SYMR.strings.center_margin_double_and_wide_page,
         )
 
-        val SplitPageMergeModes = listOf(
-            SYMR.strings.merge_split_pages_none,
-            SYMR.strings.merge_split_pages_several,
+        val SplitPageStitchModes = listOf(
+            SYMR.strings.stitch_split_pages_none,
+            SYMR.strings.stitch_split_pages_several,
         )
 
         val archiveModeTypes = listOf(

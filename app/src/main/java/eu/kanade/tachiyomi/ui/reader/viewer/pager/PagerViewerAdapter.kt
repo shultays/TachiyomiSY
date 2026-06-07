@@ -238,19 +238,19 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     }
 
     // SY -->
-    fun rebuildSplitPageMerges() {
+    fun rebuildSplitPageStitches() {
         subItems.filterIsInstance<ReaderPage>().forEach {
             it.splitPageNext = null
             it.splitPageWidth = null
             it.splitPageHeight = null
-            it.splitPageDiagnostics = null
+            it.splitPageStitchDiagnostics = null
         }
         setJoinedItems()
     }
 
     private fun setJoinedItems(useSecondPage: Boolean = false) {
         val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
-        if (!viewer.config.doublePages || viewer.config.splitPageMergeMode != PagerConfig.SplitPageMergeMode.NONE) {
+        if (!viewer.config.doublePages || viewer.config.splitPageStitchMode != PagerConfig.SplitPageStitchMode.NONE) {
             // If not in double mode, set up items like before
             subItems.forEach { readerItem ->
                 if (readerItem is ReaderPage) {
@@ -393,7 +393,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     }
 
     private fun buildSplitPageItems(): MutableList<JoinedItem> {
-        if (viewer.config.splitPageMergeMode == PagerConfig.SplitPageMergeMode.NONE) {
+        if (viewer.config.splitPageStitchMode == PagerConfig.SplitPageStitchMode.NONE) {
             return subItems.map { JoinedItem(it) }.toMutableList()
         }
 
@@ -465,23 +465,23 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         return result
     }
 
-    internal fun onSplitPageDetection(
+    internal fun onSplitPageStitchDetection(
         page: ReaderPage,
-        mergesWithNext: Boolean,
+        stitchesWithNext: Boolean,
         candidate: ReaderPage?,
-        detection: PagerPageHolder.SplitPageDetection?,
+        detection: PagerPageHolder.SplitPageStitchDetection?,
     ) {
-        if (viewer.config.splitPageMergeMode == PagerConfig.SplitPageMergeMode.NONE) return
+        if (viewer.config.splitPageStitchMode == PagerConfig.SplitPageStitchMode.NONE) return
         if (detection != null && detection.config != viewer.config.splitPageDetectorConfig()) return
         if (detection != null) {
             page.splitPageWidth = detection.diagnostics.firstWidth
             page.splitPageHeight = detection.diagnostics.firstHeight
-            page.splitPageDiagnostics = detection.diagnostics
+            page.splitPageStitchDiagnostics = detection.diagnostics
             candidate?.splitPageWidth = detection.diagnostics.secondWidth
             candidate?.splitPageHeight = detection.diagnostics.secondHeight
         }
-        if (page.splitPageNext == mergesWithNext) return
-        page.splitPageNext = mergesWithNext
+        if (page.splitPageNext == stitchesWithNext) return
+        page.splitPageNext = stitchesWithNext
         setJoinedItems()
     }
 

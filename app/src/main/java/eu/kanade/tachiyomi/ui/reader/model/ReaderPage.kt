@@ -33,5 +33,5 @@ open class ReaderPage(
 
     var splitPageHeight: Int? = null
 
-    var splitPageDiagnostics: SplitPageMergeDiagnostics? = null
+    var splitPageStitchDiagnostics: SplitPageStitchDiagnostics? = null
 }

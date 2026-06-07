@@ -37,7 +37,7 @@ class PagerConfig(
 
     var reloadChapterListener: ((Boolean) -> Unit)? = null
 
-    var splitPageMergeChangedListener: (() -> Unit)? = null
+    var splitPageStitchChangedListener: (() -> Unit)? = null
 
     var imageScaleType = 1
         private set
@@ -77,21 +77,21 @@ class PagerConfig(
 
     var centerMarginType = CenterMarginType.NONE
 
-    var splitPageMergeMode = SplitPageMergeMode.NONE
+    var splitPageStitchMode = SplitPageStitchMode.NONE
 
-    var splitPageMergeThreshold = SplitPageMergeThreshold.DEFAULT
+    var splitPageStitchThreshold = SplitPageStitchThreshold.DEFAULT
 
-    var splitPageMergeMaxHeightRatio = SplitPageMergeMaxHeightRatio.DEFAULT
+    var splitPageStitchMaxHeightRatio = SplitPageStitchMaxHeightRatio.DEFAULT
 
-    var splitPageMergeMinimumEdgeVariance = SplitPageMergeMinimumEdgeVariance.DEFAULT
+    var splitPageStitchMinimumEdgeVariance = SplitPageStitchMinimumEdgeVariance.DEFAULT
 
-    var splitPageMergeContinuityMultiplier = SplitPageMergeContinuityMultiplier.DEFAULT
+    var splitPageStitchContinuityMultiplier = SplitPageStitchContinuityMultiplier.DEFAULT
 
-    var splitPageMergeMinimumContinuity = SplitPageMergeMinimumContinuity.DEFAULT
+    var splitPageStitchMinimumContinuity = SplitPageStitchMinimumContinuity.DEFAULT
 
-    var splitPageMergeSampleColumns = SplitPageMergeSampleColumns.DEFAULT
+    var splitPageStitchSampleColumns = SplitPageStitchSampleColumns.DEFAULT
 
-    var splitPageMergeSampleRows = SplitPageMergeSampleRows.DEFAULT
+    var splitPageStitchSampleRows = SplitPageStitchSampleRows.DEFAULT
 
     // SY <--
 
@@ -187,75 +187,75 @@ class PagerConfig(
         readerPreferences.centerMarginType
             .register({ centerMarginType = it }, { imagePropertyChangedListener?.invoke() })
 
-        readerPreferences.splitPageMergeMode
+        readerPreferences.splitPageStitchMode
             .register(
-                { splitPageMergeMode = SplitPageMergeMode.normalize(it) },
+                { splitPageStitchMode = SplitPageStitchMode.normalize(it) },
                 {
-                    splitPageMergeMode = SplitPageMergeMode.normalize(it)
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchMode = SplitPageStitchMode.normalize(it)
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeThreshold
+        readerPreferences.splitPageStitchThreshold
             .register(
-                { splitPageMergeThreshold = it },
+                { splitPageStitchThreshold = it },
                 {
-                    splitPageMergeThreshold = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchThreshold = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeMaxHeightRatio
+        readerPreferences.splitPageStitchMaxHeightRatio
             .register(
-                { splitPageMergeMaxHeightRatio = it },
+                { splitPageStitchMaxHeightRatio = it },
                 {
-                    splitPageMergeMaxHeightRatio = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchMaxHeightRatio = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeMinimumEdgeVariance
+        readerPreferences.splitPageStitchMinimumEdgeVariance
             .register(
-                { splitPageMergeMinimumEdgeVariance = it },
+                { splitPageStitchMinimumEdgeVariance = it },
                 {
-                    splitPageMergeMinimumEdgeVariance = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchMinimumEdgeVariance = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeContinuityMultiplier
+        readerPreferences.splitPageStitchContinuityMultiplier
             .register(
-                { splitPageMergeContinuityMultiplier = it },
+                { splitPageStitchContinuityMultiplier = it },
                 {
-                    splitPageMergeContinuityMultiplier = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchContinuityMultiplier = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeMinimumContinuity
+        readerPreferences.splitPageStitchMinimumContinuity
             .register(
-                { splitPageMergeMinimumContinuity = it },
+                { splitPageStitchMinimumContinuity = it },
                 {
-                    splitPageMergeMinimumContinuity = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchMinimumContinuity = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeSampleColumns
+        readerPreferences.splitPageStitchSampleColumns
             .register(
-                { splitPageMergeSampleColumns = it },
+                { splitPageStitchSampleColumns = it },
                 {
-                    splitPageMergeSampleColumns = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchSampleColumns = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
-        readerPreferences.splitPageMergeSampleRows
+        readerPreferences.splitPageStitchSampleRows
             .register(
-                { splitPageMergeSampleRows = it },
+                { splitPageStitchSampleRows = it },
                 {
-                    splitPageMergeSampleRows = it
-                    splitPageMergeChangedListener?.invoke()
+                    splitPageStitchSampleRows = it
+                    splitPageStitchChangedListener?.invoke()
                 },
             )
 
@@ -319,63 +319,63 @@ class PagerConfig(
         const val AUTOMATIC = 2
     }
 
-    object SplitPageMergeMode {
+    object SplitPageStitchMode {
         const val NONE = 0
         const val SEVERAL = 1
 
         fun normalize(value: Int) = if (value == NONE) NONE else SEVERAL
     }
 
-    object SplitPageMergeThreshold {
+    object SplitPageStitchThreshold {
         const val MIN = 5
         const val MAX = 100
         const val DEFAULT = 21
     }
 
-    object SplitPageMergeMaxHeightRatio {
+    object SplitPageStitchMaxHeightRatio {
         const val MIN = 100
         const val MAX = 400
         const val DEFAULT = 175
     }
 
-    object SplitPageMergeMinimumEdgeVariance {
+    object SplitPageStitchMinimumEdgeVariance {
         const val MIN = 0
         const val MAX = 100
         const val DEFAULT = 8
     }
 
-    object SplitPageMergeContinuityMultiplier {
+    object SplitPageStitchContinuityMultiplier {
         const val MIN = 100
         const val MAX = 800
         const val DEFAULT = 300
     }
 
-    object SplitPageMergeMinimumContinuity {
+    object SplitPageStitchMinimumContinuity {
         const val MIN = 0
         const val MAX = 200
         const val DEFAULT = 35
     }
 
-    object SplitPageMergeSampleColumns {
+    object SplitPageStitchSampleColumns {
         const val MIN = 8
         const val MAX = 128
         const val DEFAULT = 64
     }
 
-    object SplitPageMergeSampleRows {
+    object SplitPageStitchSampleRows {
         const val MIN = 1
         const val MAX = 16
         const val DEFAULT = 6
     }
 
     internal fun splitPageDetectorConfig() = SplitPageDetector.Config(
-        thresholdPercent = splitPageMergeThreshold,
-        maxCombinedHeightRatioPercent = splitPageMergeMaxHeightRatio,
-        minimumEdgeVarianceTenthsPercent = splitPageMergeMinimumEdgeVariance,
-        continuityMultiplierPercent = splitPageMergeContinuityMultiplier,
-        minimumContinuityTenthsPercent = splitPageMergeMinimumContinuity,
-        sampleColumns = splitPageMergeSampleColumns,
-        sampleRows = splitPageMergeSampleRows,
+        thresholdPercent = splitPageStitchThreshold,
+        maxCombinedHeightRatioPercent = splitPageStitchMaxHeightRatio,
+        minimumEdgeVarianceTenthsPercent = splitPageStitchMinimumEdgeVariance,
+        continuityMultiplierPercent = splitPageStitchContinuityMultiplier,
+        minimumContinuityTenthsPercent = splitPageStitchMinimumContinuity,
+        sampleColumns = splitPageStitchSampleColumns,
+        sampleRows = splitPageStitchSampleRows,
     )
 
     fun themeToColor(theme: Int) {

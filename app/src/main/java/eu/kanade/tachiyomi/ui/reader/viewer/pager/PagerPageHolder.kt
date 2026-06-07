@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.ui.reader.model.SplitPageMergeDiagnostics
+import eu.kanade.tachiyomi.ui.reader.model.SplitPageStitchDiagnostics
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressIndicator
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -133,7 +133,7 @@ class PagerPageHolder(
                     Page.State.Ready -> onPageReady(page)
                     is Page.State.Error -> {
                         if (detectionOnly) {
-                            viewer.onSplitPageDetection(splitDetectionPage, false)
+                            viewer.onSplitPageStitchDetection(splitDetectionPage, false)
                         } else {
                             setError(state.error)
                         }
@@ -152,7 +152,7 @@ class PagerPageHolder(
                 readyPages.contains(splitCandidate)
             ) {
                 detectionStarted = true
-                scope.launch { detectSplitPage(splitCandidate) }
+                scope.launch { detectSplitPageStitch(splitCandidate) }
             }
             return
         }
@@ -275,7 +275,7 @@ class PagerPageHolder(
         }
     }
 
-    private suspend fun detectSplitPage(candidate: ReaderPage) {
+    private suspend fun detectSplitPageStitch(candidate: ReaderPage) {
         val detectorConfig = viewer.config.splitPageDetectorConfig()
         val detection = withIOContext {
             val firstStream = splitDetectionPage.stream ?: return@withIOContext null
@@ -294,7 +294,7 @@ class PagerPageHolder(
                     val secondBitmap = decodeImage(secondSource, sampleSize = 8) ?: return@withIOContext null
                     try {
                         val diagnostics = SplitPageDetector.analyze(firstBitmap, secondBitmap, detectorConfig)
-                        SplitPageDetection(
+                        SplitPageStitchDetection(
                             diagnostics = diagnostics,
                             config = detectorConfig,
                         )
@@ -305,16 +305,16 @@ class PagerPageHolder(
                 }
             }
         }
-        viewer.onSplitPageDetection(
+        viewer.onSplitPageStitchDetection(
             splitDetectionPage,
-            detection?.diagnostics?.merges == true,
+            detection?.diagnostics?.stitches == true,
             candidate,
             detection,
         )
     }
 
-    internal data class SplitPageDetection(
-        val diagnostics: SplitPageMergeDiagnostics,
+    internal data class SplitPageStitchDetection(
+        val diagnostics: SplitPageStitchDiagnostics,
         val config: SplitPageDetector.Config,
     )
 

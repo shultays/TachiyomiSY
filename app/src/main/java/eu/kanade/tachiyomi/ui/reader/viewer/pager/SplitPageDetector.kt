@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
-import eu.kanade.tachiyomi.ui.reader.model.SplitPageMergeDiagnostics
+import eu.kanade.tachiyomi.ui.reader.model.SplitPageStitchDiagnostics
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -20,7 +20,7 @@ internal object SplitPageDetector {
         val sampleRows: Int,
     )
 
-    fun analyze(upper: Bitmap, lower: Bitmap, config: Config): SplitPageMergeDiagnostics {
+    fun analyze(upper: Bitmap, lower: Bitmap, config: Config): SplitPageStitchDiagnostics {
         val maximumCombinedHeightRatio = config.maxCombinedHeightRatioPercent / 100f
         val seamThreshold = config.thresholdPercent.coerceIn(1, 100) / 100f
         val minimumEdgeVariance = config.minimumEdgeVarianceTenthsPercent.coerceAtLeast(0) / 1000f
@@ -33,14 +33,14 @@ internal object SplitPageDetector {
         }
 
         fun result(
-            merges: Boolean,
-            reason: SplitPageMergeDiagnostics.Reason,
+            stitches: Boolean,
+            reason: SplitPageStitchDiagnostics.Reason,
             seamDifference: Float? = null,
             localDifference: Float? = null,
             edgeVariance: Float? = null,
             continuityLimit: Float? = null,
-        ) = SplitPageMergeDiagnostics(
-            merges = merges,
+        ) = SplitPageStitchDiagnostics(
+            stitches = stitches,
             reason = reason,
             firstWidth = upper.width,
             firstHeight = upper.height,
@@ -61,13 +61,13 @@ internal object SplitPageDetector {
         )
 
         if (upper.width < 2 || upper.height < 2 || lower.height < 2) {
-            return result(false, SplitPageMergeDiagnostics.Reason.INVALID_SIZE)
+            return result(false, SplitPageStitchDiagnostics.Reason.INVALID_SIZE)
         }
         if (upper.width != lower.width) {
-            return result(false, SplitPageMergeDiagnostics.Reason.WIDTH_MISMATCH)
+            return result(false, SplitPageStitchDiagnostics.Reason.WIDTH_MISMATCH)
         }
         if (!isCombinedHeightAllowed(upper.width, upper.height + lower.height, config)) {
-            return result(false, SplitPageMergeDiagnostics.Reason.COMBINED_IMAGE_TOO_TALL)
+            return result(false, SplitPageStitchDiagnostics.Reason.COMBINED_IMAGE_TOO_TALL)
         }
 
         val seamDifference = seamDifference(upper, lower, config)
@@ -81,7 +81,7 @@ internal object SplitPageDetector {
         if (seamVariance < minimumEdgeVariance) {
             return result(
                 false,
-                SplitPageMergeDiagnostics.Reason.EDGE_VARIANCE_TOO_LOW,
+                SplitPageStitchDiagnostics.Reason.EDGE_VARIANCE_TOO_LOW,
                 seamDifference,
                 localDifference,
                 seamVariance,
@@ -92,7 +92,7 @@ internal object SplitPageDetector {
         if (seamDifference > seamThreshold) {
             return result(
                 false,
-                SplitPageMergeDiagnostics.Reason.SEAM_DIFFERENCE_TOO_HIGH,
+                SplitPageStitchDiagnostics.Reason.SEAM_DIFFERENCE_TOO_HIGH,
                 seamDifference,
                 localDifference,
                 seamVariance,
@@ -102,7 +102,7 @@ internal object SplitPageDetector {
         if (seamDifference > continuityLimit) {
             return result(
                 false,
-                SplitPageMergeDiagnostics.Reason.CONTINUITY_TOO_LOW,
+                SplitPageStitchDiagnostics.Reason.CONTINUITY_TOO_LOW,
                 seamDifference,
                 localDifference,
                 seamVariance,
@@ -111,7 +111,7 @@ internal object SplitPageDetector {
         }
         return result(
             true,
-            SplitPageMergeDiagnostics.Reason.MERGED,
+            SplitPageStitchDiagnostics.Reason.STITCHED,
             seamDifference,
             localDifference,
             seamVariance,
