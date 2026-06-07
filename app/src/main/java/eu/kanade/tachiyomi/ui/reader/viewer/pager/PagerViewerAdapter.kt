@@ -237,6 +237,12 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         readerThemedContext = viewer.activity.createReaderThemeContext()
     }
 
+    fun blacklistPage(page: ReaderPage) {
+        page.isBlacklisted = true
+        subItems.removeAll { it == page || (it is InsertPage && it.parent == page) }
+        setJoinedItems()
+    }
+
     // SY -->
     fun rebuildSplitPageStitches() {
         subItems.filterIsInstance<ReaderPage>().forEach {
@@ -365,6 +371,11 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         // We will however shift to the first page of the new chapter if the last page we were are
         // on is not in the new chapter that has loaded
         val newPage = when {
+            (oldCurrent?.first as? ReaderPage)?.isBlacklisted == true -> {
+                subItems.filterIsInstance<ReaderPage>()
+                    .filter { it.chapter == currentChapter }
+                    .minByOrNull { kotlin.math.abs(it.index - (oldCurrent.first as ReaderPage).index) }
+            }
             oldCurrent?.first is ReaderPage &&
                 (oldCurrent.first as ReaderPage).chapter != currentChapter &&
                 (oldCurrent.second as? ChapterTransition)?.from != currentChapter ->
@@ -442,10 +453,10 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 val nextCanBePaired = next?.let {
                     it.chapter.chapter.id == item.chapter.chapter.id &&
                         (
-                        it.splitPageNext == false ||
-                            subItems.getOrNull(index + 2) !is ReaderPage ||
-                            (subItems[index + 2] as ReaderPage).chapter.chapter.id != item.chapter.chapter.id
-                        ) &&
+                            it.splitPageNext == false ||
+                                subItems.getOrNull(index + 2) !is ReaderPage ||
+                                (subItems[index + 2] as ReaderPage).chapter.chapter.id != item.chapter.chapter.id
+                            ) &&
                         !it.fullPage
                 } == true
                 if (nextCanBePaired) {

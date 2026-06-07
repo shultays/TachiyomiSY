@@ -31,6 +31,8 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.all.MergedSource
+import eu.kanade.tachiyomi.ui.reader.blacklist.BlacklistedPage
+import eu.kanade.tachiyomi.ui.reader.blacklist.BlacklistedPageStore
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
@@ -146,6 +148,8 @@ class ReaderViewModel @JvmOverloads constructor(
 
     private val eventChannel = Channel<Event>()
     val eventFlow = eventChannel.receiveAsFlow()
+
+    private val blacklistedPageStore = BlacklistedPageStore(Injekt.get<Application>())
 
     /**
      * The manga loaded in the reader. It can be null when instantiated for a short time.
@@ -378,6 +382,7 @@ class ReaderViewModel @JvmOverloads constructor(
                     mutableState.update {
                         it.copy(
                             manga = manga,
+                            blacklistedPages = blacklistedPageStore.get(manga.id),
                             /* SY --> */
                             meta = metadata,
                             mergedManga = mergedManga,
@@ -1051,6 +1056,45 @@ class ReaderViewModel @JvmOverloads constructor(
         mutableState.update { it.copy(dialog = Dialog.Settings) }
     }
 
+    fun addCurrentPageToBlacklist() {
+        val manga = manga ?: return
+        val page = when (val viewer = state.value.viewer) {
+            is PagerViewer -> viewer.currentPage as? ReaderPage
+            is eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer ->
+                viewer.currentPage as? ReaderPage
+            else -> null
+        } ?: return
+
+        viewModelScope.launchIO {
+            blacklistedPageStore.add(manga.id, page) ?: return@launchIO
+            page.isBlacklisted = true
+            mutableState.update { it.copy(blacklistedPages = blacklistedPageStore.get(manga.id)) }
+            withUIContext {
+                when (val viewer = state.value.viewer) {
+                    is PagerViewer -> viewer.onPageBlacklisted(page)
+                    is eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer ->
+                        viewer.onPageBlacklisted(page)
+                }
+            }
+        }
+    }
+
+    fun removeBlacklistedPage(id: String) {
+        val manga = manga ?: return
+        viewModelScope.launchIO {
+            blacklistedPageStore.remove(manga.id, id)
+            mutableState.update { it.copy(blacklistedPages = blacklistedPageStore.get(manga.id)) }
+        }
+    }
+
+    suspend fun isPageBlacklisted(page: ReaderPage): Boolean {
+        val manga = manga ?: return false
+        return withIOContext {
+            val entries = state.value.blacklistedPages.ifEmpty { blacklistedPageStore.get(manga.id) }
+            blacklistedPageStore.matches(page, entries)
+        }
+    }
+
     fun closeDialog() {
         mutableState.update { it.copy(dialog = null) }
     }
@@ -1357,6 +1401,7 @@ class ReaderViewModel @JvmOverloads constructor(
 
         // SY -->
         val currentPageText: String = "",
+        val blacklistedPages: List<BlacklistedPage> = emptyList(),
         val meta: RaisedSearchMetadata? = null,
         val mergedManga: Map<Long, Manga>? = null,
         val ehUtilsVisible: Boolean = false,

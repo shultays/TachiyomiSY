@@ -483,6 +483,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         }
     }
 
+    fun onPageBlacklisted(page: ReaderPage) {
+        currentPage = null
+        adapter.blacklistPage(page)
+        onPageChange(pager.currentItem.coerceAtMost(adapter.joinedItems.lastIndex).coerceAtLeast(0))
+    }
+
     private fun cleanupPageSplit() {
         adapter.cleanupPageSplit()
     }

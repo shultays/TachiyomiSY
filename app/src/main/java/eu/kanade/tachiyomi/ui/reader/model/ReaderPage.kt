@@ -34,4 +34,8 @@ open class ReaderPage(
     var splitPageHeight: Int? = null
 
     var splitPageStitchDiagnostics: SplitPageStitchDiagnostics? = null
+
+    var blacklistHash: ByteArray? = null
+
+    var isBlacklisted: Boolean = false
 }
