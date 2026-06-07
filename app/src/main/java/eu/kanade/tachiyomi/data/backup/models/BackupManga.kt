@@ -49,6 +49,15 @@ data class BackupManga(
     @ProtoNumber(601) var flatMetadata: BackupFlatMetadata? = null,
     @ProtoNumber(602) var customStatus: Int = 0,
     @ProtoNumber(603) var customThumbnailUrl: String? = null,
+    @ProtoNumber(604) var stitchSplitPageMode: Int = 0,
+    @ProtoNumber(605) var stitchSplitPageThreshold: Int = 21,
+    @ProtoNumber(606) var stitchSplitPageMaxHeightRatio: Int = 175,
+    @ProtoNumber(607) var stitchSplitPageMinimumEdgeVariance: Int = 8,
+    @ProtoNumber(608) var stitchSplitPageContinuityMultiplier: Int = 600,
+    @ProtoNumber(609) var stitchSplitPageMinimumContinuity: Int = 200,
+    @ProtoNumber(610) var stitchSplitPageSampleColumns: Int = 64,
+    @ProtoNumber(611) var stitchSplitPageSampleRows: Int = 6,
+    @ProtoNumber(612) var stitchSplitPageMaximumStripHeight: Int = 25,
 
     // J2K specific values
     @ProtoNumber(800) var customTitle: String? = null,
@@ -82,6 +91,15 @@ data class BackupManga(
             version = this@BackupManga.version,
             notes = this@BackupManga.notes,
             initialized = this@BackupManga.initialized,
+            stitchSplitPageMode = this@BackupManga.stitchSplitPageMode,
+            stitchSplitPageThreshold = this@BackupManga.stitchSplitPageThreshold,
+            stitchSplitPageMaxHeightRatio = this@BackupManga.stitchSplitPageMaxHeightRatio,
+            stitchSplitPageMinimumEdgeVariance = this@BackupManga.stitchSplitPageMinimumEdgeVariance,
+            stitchSplitPageContinuityMultiplier = this@BackupManga.stitchSplitPageContinuityMultiplier,
+            stitchSplitPageMinimumContinuity = this@BackupManga.stitchSplitPageMinimumContinuity,
+            stitchSplitPageSampleColumns = this@BackupManga.stitchSplitPageSampleColumns,
+            stitchSplitPageSampleRows = this@BackupManga.stitchSplitPageSampleRows,
+            stitchSplitPageMaximumStripHeight = this@BackupManga.stitchSplitPageMaximumStripHeight,
         )
     }
 }

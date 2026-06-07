@@ -199,6 +199,7 @@ class MangaRepositoryImpl(
                     stitchSplitPageMinimumContinuity = value.stitchSplitPageMinimumContinuity?.toLong(),
                     stitchSplitPageSampleColumns = value.stitchSplitPageSampleColumns?.toLong(),
                     stitchSplitPageSampleRows = value.stitchSplitPageSampleRows?.toLong(),
+                    stitchSplitPageMaximumStripHeight = value.stitchSplitPageMaximumStripHeight?.toLong(),
                 )
             }
         }

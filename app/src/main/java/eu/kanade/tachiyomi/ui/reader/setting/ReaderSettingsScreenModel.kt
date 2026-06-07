@@ -105,5 +105,14 @@ class ReaderSettingsScreenModel(
             }
         }
     }
+
+    fun setStitchSplitPageMaximumStripHeight(maximumHeight: Int) {
+        val manga = mangaFlow.value ?: return
+        ioCoroutineScope.launch {
+            if (setMangaStitchSettings.setStitchSplitPageMaximumStripHeight(manga, maximumHeight)) {
+                onStitchSettingsChanged(manga.copy(stitchSplitPageMaximumStripHeight = maximumHeight))
+            }
+        }
+    }
     // SY <--
 }

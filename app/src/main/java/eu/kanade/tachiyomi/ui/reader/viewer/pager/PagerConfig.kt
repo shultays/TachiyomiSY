@@ -93,6 +93,8 @@ class PagerConfig(
 
     var splitPageStitchSampleRows = SplitPageStitchSampleRows.DEFAULT
 
+    var splitPageStitchMaximumStripHeight = SplitPageStitchMaximumStripHeight.DEFAULT
+
     // SY <--
 
     init {
@@ -249,9 +251,10 @@ class PagerConfig(
 
     object SplitPageStitchMode {
         const val NONE = 0
-        const val SEVERAL = 1
+        const val EDGE_MATCHING = 1
+        const val APPEND_SHORT_PAGES = 2
 
-        fun normalize(value: Int) = if (value == NONE) NONE else SEVERAL
+        fun normalize(value: Int) = value.coerceIn(NONE, APPEND_SHORT_PAGES)
     }
 
     object SplitPageStitchThreshold {
@@ -296,6 +299,12 @@ class PagerConfig(
         const val DEFAULT = 6
     }
 
+    object SplitPageStitchMaximumStripHeight {
+        const val MIN = 5
+        const val MAX = 50
+        const val DEFAULT = 25
+    }
+
     // SY -->
     fun loadMangaStitchSettings(
         manga: tachiyomi.domain.manga.model.Manga,
@@ -309,6 +318,7 @@ class PagerConfig(
         splitPageStitchMinimumContinuity = manga.stitchSplitPageMinimumContinuity
         splitPageStitchSampleColumns = manga.stitchSplitPageSampleColumns
         splitPageStitchSampleRows = manga.stitchSplitPageSampleRows
+        splitPageStitchMaximumStripHeight = manga.stitchSplitPageMaximumStripHeight
         if (notifyChanged) {
             splitPageStitchChangedListener?.invoke()
         }
@@ -316,6 +326,7 @@ class PagerConfig(
     // SY <--
 
     internal fun splitPageDetectorConfig() = SplitPageDetector.Config(
+        mode = splitPageStitchMode,
         thresholdPercent = splitPageStitchThreshold,
         maxCombinedHeightRatioPercent = splitPageStitchMaxHeightRatio,
         minimumEdgeVarianceTenthsPercent = splitPageStitchMinimumEdgeVariance,
@@ -323,6 +334,7 @@ class PagerConfig(
         minimumContinuityTenthsPercent = splitPageStitchMinimumContinuity,
         sampleColumns = splitPageStitchSampleColumns,
         sampleRows = splitPageStitchSampleRows,
+        maximumStripHeightPercent = splitPageStitchMaximumStripHeight,
     )
 
     fun themeToColor(theme: Int) {

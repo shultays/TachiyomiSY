@@ -135,6 +135,15 @@ class MangaRestorer(
             updateStrategy = newer.updateStrategy,
             initialized = this.initialized || newer.initialized,
             version = newer.version,
+            stitchSplitPageMode = newer.stitchSplitPageMode,
+            stitchSplitPageThreshold = newer.stitchSplitPageThreshold,
+            stitchSplitPageMaxHeightRatio = newer.stitchSplitPageMaxHeightRatio,
+            stitchSplitPageMinimumEdgeVariance = newer.stitchSplitPageMinimumEdgeVariance,
+            stitchSplitPageContinuityMultiplier = newer.stitchSplitPageContinuityMultiplier,
+            stitchSplitPageMinimumContinuity = newer.stitchSplitPageMinimumContinuity,
+            stitchSplitPageSampleColumns = newer.stitchSplitPageSampleColumns,
+            stitchSplitPageSampleRows = newer.stitchSplitPageSampleRows,
+            stitchSplitPageMaximumStripHeight = newer.stitchSplitPageMaximumStripHeight,
         )
     }
 
@@ -174,6 +183,7 @@ class MangaRestorer(
                 stitchSplitPageMinimumContinuity = manga.stitchSplitPageMinimumContinuity.toLong(),
                 stitchSplitPageSampleColumns = manga.stitchSplitPageSampleColumns.toLong(),
                 stitchSplitPageSampleRows = manga.stitchSplitPageSampleRows.toLong(),
+                stitchSplitPageMaximumStripHeight = manga.stitchSplitPageMaximumStripHeight.toLong(),
             )
         }
         return manga

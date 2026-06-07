@@ -11,6 +11,7 @@ import kotlin.math.max
 internal object SplitPageDetector {
 
     data class Config(
+        val mode: Int,
         val thresholdPercent: Int,
         val maxCombinedHeightRatioPercent: Int,
         val minimumEdgeVarianceTenthsPercent: Int,
@@ -18,6 +19,7 @@ internal object SplitPageDetector {
         val minimumContinuityTenthsPercent: Int,
         val sampleColumns: Int,
         val sampleRows: Int,
+        val maximumStripHeightPercent: Int,
     )
 
     fun analyze(upper: Bitmap, lower: Bitmap, config: Config): SplitPageStitchDiagnostics {
@@ -26,6 +28,7 @@ internal object SplitPageDetector {
         val minimumEdgeVariance = config.minimumEdgeVarianceTenthsPercent.coerceAtLeast(0) / 1000f
         val minimumContinuity = config.minimumContinuityTenthsPercent.coerceAtLeast(0) / 1000f
         val continuityMultiplier = config.continuityMultiplierPercent.coerceAtLeast(0) / 100f
+        val maximumStripHeightRatio = config.maximumStripHeightPercent.coerceAtLeast(0) / 100f
         val combinedHeightRatio = if (upper.width > 0) {
             (upper.height + lower.height).toFloat() / upper.width
         } else {
@@ -39,6 +42,7 @@ internal object SplitPageDetector {
             localDifference: Float? = null,
             edgeVariance: Float? = null,
             continuityLimit: Float? = null,
+            stripHeightRatio: Float? = null,
         ) = SplitPageStitchDiagnostics(
             stitches = stitches,
             reason = reason,
@@ -58,6 +62,8 @@ internal object SplitPageDetector {
             minimumContinuity = minimumContinuity,
             sampleColumns = config.sampleColumns,
             sampleRows = config.sampleRows,
+            stripHeightRatio = stripHeightRatio,
+            maximumStripHeightRatio = maximumStripHeightRatio,
         )
 
         if (upper.width < 2 || upper.height < 2 || lower.height < 2) {
@@ -68,6 +74,26 @@ internal object SplitPageDetector {
         }
         if (!isCombinedHeightAllowed(upper.width, upper.height + lower.height, config)) {
             return result(false, SplitPageStitchDiagnostics.Reason.COMBINED_IMAGE_TOO_TALL)
+        }
+
+        if (config.mode == PagerConfig.SplitPageStitchMode.APPEND_SHORT_PAGES) {
+            val stripHeightRatio = lower.height.toFloat() / upper.height
+            val appends = shouldAppendShortPage(
+                firstWidth = upper.width,
+                firstHeight = upper.height,
+                secondWidth = lower.width,
+                secondHeight = lower.height,
+                config = config,
+            )
+            return result(
+                stitches = appends,
+                reason = when {
+                    appends -> SplitPageStitchDiagnostics.Reason.SHORT_PAGE_APPENDED
+                    stripHeightRatio > maximumStripHeightRatio -> SplitPageStitchDiagnostics.Reason.STRIP_TOO_TALL
+                    else -> SplitPageStitchDiagnostics.Reason.COMBINED_IMAGE_NOT_PORTRAIT
+                },
+                stripHeightRatio = stripHeightRatio,
+            )
         }
 
         val seamDifference = seamDifference(upper, lower, config)
@@ -121,6 +147,29 @@ internal object SplitPageDetector {
 
     fun isCombinedHeightAllowed(width: Int, totalHeight: Int, config: Config): Boolean =
         width > 0 && totalHeight.toFloat() / width <= config.maxCombinedHeightRatioPercent / 100f
+
+    fun shouldAppendShortPage(
+        firstWidth: Int,
+        firstHeight: Int,
+        secondWidth: Int,
+        secondHeight: Int,
+        config: Config,
+    ): Boolean {
+        return firstWidth >= 2 &&
+            firstHeight >= 2 &&
+            secondHeight >= 2 &&
+            firstWidth == secondWidth &&
+            secondHeight.toFloat() / firstHeight <= config.maximumStripHeightPercent / 100f &&
+            isCombinedPageShapeAllowed(firstWidth, firstHeight + secondHeight, config)
+    }
+
+    fun isCombinedPageShapeAllowed(width: Int, totalHeight: Int, config: Config): Boolean {
+        if (width <= 0 || totalHeight <= 0) return false
+        val maximumRatio = config.maxCombinedHeightRatioPercent / 100f
+        val portraitRatio = totalHeight.toFloat() / width
+        val spreadRatio = totalHeight.toFloat() / (width / 2f)
+        return portraitRatio in 1f..maximumRatio || spreadRatio in 1f..maximumRatio
+    }
 
     private fun seamDifference(upper: Bitmap, lower: Bitmap, config: Config): Float {
         var difference = 0L

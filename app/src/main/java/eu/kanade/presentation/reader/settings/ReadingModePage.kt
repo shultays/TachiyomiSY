@@ -198,16 +198,6 @@ private fun ColumnScope.PagerViewerSettings(
     }
 
     if (PagerConfig.SplitPageStitchMode.normalize(mangaStitchMode) != PagerConfig.SplitPageStitchMode.NONE) {
-        val mangaStitchThreshold = manga?.stitchSplitPageThreshold ?: PagerConfig.SplitPageStitchThreshold.DEFAULT
-        SliderItem(
-            value = mangaStitchThreshold,
-            valueRange = PagerConfig.SplitPageStitchThreshold.MIN..PagerConfig.SplitPageStitchThreshold.MAX,
-            label = stringResource(SYMR.strings.stitch_split_pages_threshold),
-            valueString = "$mangaStitchThreshold%",
-            onChange = screenModel::setStitchSplitPageThreshold,
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
-
         val mangaStitchMaxHeightRatio = manga?.stitchSplitPageMaxHeightRatio ?: PagerConfig.SplitPageStitchMaxHeightRatio.DEFAULT
         SliderItem(
             value = mangaStitchMaxHeightRatio,
@@ -218,67 +208,97 @@ private fun ColumnScope.PagerViewerSettings(
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val mangaStitchMinimumEdgeVariance = manga?.stitchSplitPageMinimumEdgeVariance ?: PagerConfig.SplitPageStitchMinimumEdgeVariance.DEFAULT
-        SliderItem(
-            value = mangaStitchMinimumEdgeVariance,
-            valueRange = PagerConfig.SplitPageStitchMinimumEdgeVariance.MIN..PagerConfig.SplitPageStitchMinimumEdgeVariance.MAX,
-            label = stringResource(SYMR.strings.stitch_split_pages_minimum_edge_variance),
-            valueString = "%.1f%%".format(mangaStitchMinimumEdgeVariance / 10f),
-            onChange = screenModel::setStitchSplitPageMinimumEdgeVariance,
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
+        if (mangaStitchMode == PagerConfig.SplitPageStitchMode.EDGE_MATCHING) {
+            val mangaStitchThreshold = manga?.stitchSplitPageThreshold ?: PagerConfig.SplitPageStitchThreshold.DEFAULT
+            SliderItem(
+                value = mangaStitchThreshold,
+                valueRange = PagerConfig.SplitPageStitchThreshold.MIN..PagerConfig.SplitPageStitchThreshold.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_threshold),
+                valueString = "$mangaStitchThreshold%",
+                onChange = screenModel::setStitchSplitPageThreshold,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
 
-        val mangaStitchContinuityMultiplier = manga?.stitchSplitPageContinuityMultiplier ?: PagerConfig.SplitPageStitchContinuityMultiplier.DEFAULT
-        SliderItem(
-            value = mangaStitchContinuityMultiplier,
-            valueRange = PagerConfig.SplitPageStitchContinuityMultiplier.MIN..PagerConfig.SplitPageStitchContinuityMultiplier.MAX,
-            label = stringResource(SYMR.strings.stitch_split_pages_continuity_multiplier),
-            valueString = "%.1fx".format(mangaStitchContinuityMultiplier / 100f),
-            onChange = screenModel::setStitchSplitPageContinuityMultiplier,
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
+            val mangaStitchMinimumEdgeVariance = manga?.stitchSplitPageMinimumEdgeVariance ?: PagerConfig.SplitPageStitchMinimumEdgeVariance.DEFAULT
+            SliderItem(
+                value = mangaStitchMinimumEdgeVariance,
+                valueRange = PagerConfig.SplitPageStitchMinimumEdgeVariance.MIN..PagerConfig.SplitPageStitchMinimumEdgeVariance.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_minimum_edge_variance),
+                valueString = "%.1f%%".format(mangaStitchMinimumEdgeVariance / 10f),
+                onChange = screenModel::setStitchSplitPageMinimumEdgeVariance,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
 
-        val mangaStitchMinimumContinuity = manga?.stitchSplitPageMinimumContinuity ?: PagerConfig.SplitPageStitchMinimumContinuity.DEFAULT
-        SliderItem(
-            value = mangaStitchMinimumContinuity,
-            valueRange = PagerConfig.SplitPageStitchMinimumContinuity.MIN..PagerConfig.SplitPageStitchMinimumContinuity.MAX,
-            label = stringResource(SYMR.strings.stitch_split_pages_minimum_continuity),
-            valueString = "%.1f%%".format(mangaStitchMinimumContinuity / 10f),
-            onChange = screenModel::setStitchSplitPageMinimumContinuity,
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
+            val mangaStitchContinuityMultiplier = manga?.stitchSplitPageContinuityMultiplier ?: PagerConfig.SplitPageStitchContinuityMultiplier.DEFAULT
+            SliderItem(
+                value = mangaStitchContinuityMultiplier,
+                valueRange = PagerConfig.SplitPageStitchContinuityMultiplier.MIN..PagerConfig.SplitPageStitchContinuityMultiplier.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_continuity_multiplier),
+                valueString = "%.1fx".format(mangaStitchContinuityMultiplier / 100f),
+                onChange = screenModel::setStitchSplitPageContinuityMultiplier,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
 
-        val mangaStitchSampleColumns = manga?.stitchSplitPageSampleColumns ?: PagerConfig.SplitPageStitchSampleColumns.DEFAULT
-        SliderItem(
-            value = mangaStitchSampleColumns,
-            valueRange = PagerConfig.SplitPageStitchSampleColumns.MIN..PagerConfig.SplitPageStitchSampleColumns.MAX,
-            label = stringResource(SYMR.strings.stitch_split_pages_sample_columns),
-            onChange = screenModel::setStitchSplitPageSampleColumns,
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
+            val mangaStitchMinimumContinuity = manga?.stitchSplitPageMinimumContinuity ?: PagerConfig.SplitPageStitchMinimumContinuity.DEFAULT
+            SliderItem(
+                value = mangaStitchMinimumContinuity,
+                valueRange = PagerConfig.SplitPageStitchMinimumContinuity.MIN..PagerConfig.SplitPageStitchMinimumContinuity.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_minimum_continuity),
+                valueString = "%.1f%%".format(mangaStitchMinimumContinuity / 10f),
+                onChange = screenModel::setStitchSplitPageMinimumContinuity,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
 
-        val mangaStitchSampleRows = manga?.stitchSplitPageSampleRows ?: PagerConfig.SplitPageStitchSampleRows.DEFAULT
-        SliderItem(
-            value = mangaStitchSampleRows,
-            valueRange = PagerConfig.SplitPageStitchSampleRows.MIN..PagerConfig.SplitPageStitchSampleRows.MAX,
-            label = stringResource(SYMR.strings.stitch_split_pages_sample_rows),
-            onChange = screenModel::setStitchSplitPageSampleRows,
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
+            val mangaStitchSampleColumns = manga?.stitchSplitPageSampleColumns ?: PagerConfig.SplitPageStitchSampleColumns.DEFAULT
+            SliderItem(
+                value = mangaStitchSampleColumns,
+                valueRange = PagerConfig.SplitPageStitchSampleColumns.MIN..PagerConfig.SplitPageStitchSampleColumns.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_sample_columns),
+                onChange = screenModel::setStitchSplitPageSampleColumns,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
+
+            val mangaStitchSampleRows = manga?.stitchSplitPageSampleRows ?: PagerConfig.SplitPageStitchSampleRows.DEFAULT
+            SliderItem(
+                value = mangaStitchSampleRows,
+                valueRange = PagerConfig.SplitPageStitchSampleRows.MIN..PagerConfig.SplitPageStitchSampleRows.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_sample_rows),
+                onChange = screenModel::setStitchSplitPageSampleRows,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
+        } else {
+            val maximumStripHeight = manga?.stitchSplitPageMaximumStripHeight
+                ?: PagerConfig.SplitPageStitchMaximumStripHeight.DEFAULT
+            SliderItem(
+                value = maximumStripHeight,
+                valueRange = PagerConfig.SplitPageStitchMaximumStripHeight.MIN..PagerConfig.SplitPageStitchMaximumStripHeight.MAX,
+                label = stringResource(SYMR.strings.stitch_split_pages_maximum_strip_height),
+                valueString = "$maximumStripHeight%",
+                onChange = screenModel::setStitchSplitPageMaximumStripHeight,
+                pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
+        }
 
         val diagnostics = viewer?.splitPageStitchDiagnostics?.collectAsState()?.value
         val diagnosticsText = diagnostics?.let {
-            """
-            Decision: ${if (it.stitches) "STITCH" else "REJECT"} (${it.reason.name})
-            Samples: ${it.firstWidth}x${it.firstHeight} + ${it.secondWidth}x${it.secondHeight}
-            Combined ratio: ${formatDiagnostic(it.combinedHeightRatio)} <= ${formatDiagnostic(it.maximumCombinedHeightRatio)}
-            Seam difference: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.seamThreshold)}
-            Local edge difference: ${formatDiagnostic(it.localDifference)}
-            Edge variance: ${formatDiagnostic(it.edgeVariance)} >= ${formatDiagnostic(it.minimumEdgeVariance)}
-            Continuity: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.continuityLimit)}
-            Continuity settings: ${formatDiagnostic(it.continuityMultiplier)}x, minimum ${formatDiagnostic(it.minimumContinuity)}
-            Sampling: ${it.sampleColumns} columns x ${it.sampleRows} rows
+            val common = """
+                Decision: ${if (it.stitches) "STITCH" else "REJECT"} (${it.reason.name})
+                Samples: ${it.firstWidth}x${it.firstHeight} + ${it.secondWidth}x${it.secondHeight}
+                Combined ratio: ${formatDiagnostic(it.combinedHeightRatio)} <= ${formatDiagnostic(it.maximumCombinedHeightRatio)}
             """.trimIndent()
+            if (it.stripHeightRatio != null) {
+                "$common\nShort page height: ${formatDiagnostic(it.stripHeightRatio)} <= ${formatDiagnostic(it.maximumStripHeightRatio)}"
+            } else {
+                """
+                    $common
+                    Seam difference: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.seamThreshold)}
+                    Local edge difference: ${formatDiagnostic(it.localDifference)}
+                    Edge variance: ${formatDiagnostic(it.edgeVariance)} >= ${formatDiagnostic(it.minimumEdgeVariance)}
+                    Continuity: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.continuityLimit)}
+                    Continuity settings: ${formatDiagnostic(it.continuityMultiplier)}x, minimum ${formatDiagnostic(it.minimumContinuity)}
+                    Sampling: ${it.sampleColumns} columns x ${it.sampleRows} rows
+                """.trimIndent()
+            }
         } ?: stringResource(SYMR.strings.stitch_split_pages_diagnostics_waiting)
 
         Text(

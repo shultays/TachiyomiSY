@@ -340,7 +340,8 @@ class ReaderPreferences(
 
         val SplitPageStitchModes = listOf(
             SYMR.strings.stitch_split_pages_none,
-            SYMR.strings.stitch_split_pages_several,
+            SYMR.strings.stitch_split_pages_edge_matching,
+            SYMR.strings.stitch_split_pages_append_short,
         )
 
         val archiveModeTypes = listOf(
