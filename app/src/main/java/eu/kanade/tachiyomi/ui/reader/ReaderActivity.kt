@@ -310,6 +310,7 @@ class ReaderActivity : BaseActivity() {
                 readerState = viewModel.state,
                 onChangeReadingMode = viewModel::setMangaReadingMode,
                 onChangeOrientation = viewModel::setMangaOrientationType,
+                onStitchSettingsChanged = viewModel::onStitchSettingsChanged,
             )
         }
 

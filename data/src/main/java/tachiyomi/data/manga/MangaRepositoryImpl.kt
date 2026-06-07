@@ -191,6 +191,14 @@ class MangaRepositoryImpl(
                     version = value.version,
                     isSyncing = 0,
                     notes = value.notes,
+                    stitchSplitPageMode = value.stitchSplitPageMode?.toLong(),
+                    stitchSplitPageThreshold = value.stitchSplitPageThreshold?.toLong(),
+                    stitchSplitPageMaxHeightRatio = value.stitchSplitPageMaxHeightRatio?.toLong(),
+                    stitchSplitPageMinimumEdgeVariance = value.stitchSplitPageMinimumEdgeVariance?.toLong(),
+                    stitchSplitPageContinuityMultiplier = value.stitchSplitPageContinuityMultiplier?.toLong(),
+                    stitchSplitPageMinimumContinuity = value.stitchSplitPageMinimumContinuity?.toLong(),
+                    stitchSplitPageSampleColumns = value.stitchSplitPageSampleColumns?.toLong(),
+                    stitchSplitPageSampleRows = value.stitchSplitPageSampleRows?.toLong(),
                 )
             }
         }

@@ -73,6 +73,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import logcat.LogPriority
 import tachiyomi.core.common.preference.toggle
@@ -574,8 +575,18 @@ class ReaderViewModel @JvmOverloads constructor(
     }
 
     fun onViewerLoaded(viewer: Viewer?) {
+        if (viewer is PagerViewer) {
+            manga?.let { viewer.config.loadMangaStitchSettings(it, notifyChanged = false) }
+        }
         mutableState.update {
             it.copy(viewer = viewer)
+        }
+    }
+
+    fun onStitchSettingsChanged(manga: Manga) {
+        viewModelScope.launch {
+            mutableState.update { it.copy(manga = manga) }
+            (state.value.viewer as? PagerViewer)?.config?.loadMangaStitchSettings(manga)
         }
     }
 

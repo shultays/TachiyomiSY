@@ -29,7 +29,15 @@ CREATE TABLE mangas(
     favorite_modified_at INTEGER,
     version INTEGER NOT NULL DEFAULT 0,
     is_syncing INTEGER NOT NULL DEFAULT 0,
-    notes TEXT NOT NULL DEFAULT ""
+    notes TEXT NOT NULL DEFAULT "",
+    stitch_split_page_mode INTEGER NOT NULL DEFAULT 0,
+    stitch_split_page_threshold INTEGER NOT NULL DEFAULT 21,
+    stitch_split_page_max_height_ratio INTEGER NOT NULL DEFAULT 175,
+    stitch_split_page_minimum_edge_variance INTEGER NOT NULL DEFAULT 8,
+    stitch_split_page_continuity_multiplier INTEGER NOT NULL DEFAULT 600,
+    stitch_split_page_minimum_continuity INTEGER NOT NULL DEFAULT 200,
+    stitch_split_page_sample_columns INTEGER NOT NULL DEFAULT 64,
+    stitch_split_page_sample_rows INTEGER NOT NULL DEFAULT 6
 );
 
 CREATE INDEX library_favorite_index ON mangas(favorite) WHERE favorite = 1;
@@ -198,8 +206,8 @@ AND _id NOT IN (
 );
 
 insert:
-INSERT INTO mangas(source, url, artist, author, description, genre, title, status, thumbnail_url, favorite, last_update, next_update, initialized, viewer, chapter_flags, cover_last_modified, date_added, update_strategy, calculate_interval, last_modified_at, version, notes)
-VALUES (:source, :url, :artist, :author, :description, :genre, :title, :status, :thumbnailUrl, :favorite, :lastUpdate, :nextUpdate, :initialized, :viewerFlags, :chapterFlags, :coverLastModified, :dateAdded, :updateStrategy, :calculateInterval, 0, :version, :notes);
+INSERT INTO mangas(source, url, artist, author, description, genre, title, status, thumbnail_url, favorite, last_update, next_update, initialized, viewer, chapter_flags, cover_last_modified, date_added, update_strategy, calculate_interval, last_modified_at, version, notes, stitch_split_page_mode, stitch_split_page_threshold, stitch_split_page_max_height_ratio, stitch_split_page_minimum_edge_variance, stitch_split_page_continuity_multiplier, stitch_split_page_minimum_continuity, stitch_split_page_sample_columns, stitch_split_page_sample_rows)
+VALUES (:source, :url, :artist, :author, :description, :genre, :title, :status, :thumbnailUrl, :favorite, :lastUpdate, :nextUpdate, :initialized, :viewerFlags, :chapterFlags, :coverLastModified, :dateAdded, :updateStrategy, :calculateInterval, 0, :version, :notes, 0, 21, 175, 8, 600, 200, 64, 6);
 
 update:
 UPDATE mangas SET
@@ -224,7 +232,15 @@ UPDATE mangas SET
     calculate_interval = coalesce(:calculateInterval, calculate_interval),
     version = coalesce(:version, version),
     is_syncing = coalesce(:isSyncing, is_syncing),
-    notes = coalesce(:notes, notes)
+    notes = coalesce(:notes, notes),
+    stitch_split_page_mode = coalesce(:stitchSplitPageMode, stitch_split_page_mode),
+    stitch_split_page_threshold = coalesce(:stitchSplitPageThreshold, stitch_split_page_threshold),
+    stitch_split_page_max_height_ratio = coalesce(:stitchSplitPageMaxHeightRatio, stitch_split_page_max_height_ratio),
+    stitch_split_page_minimum_edge_variance = coalesce(:stitchSplitPageMinimumEdgeVariance, stitch_split_page_minimum_edge_variance),
+    stitch_split_page_continuity_multiplier = coalesce(:stitchSplitPageContinuityMultiplier, stitch_split_page_continuity_multiplier),
+    stitch_split_page_minimum_continuity = coalesce(:stitchSplitPageMinimumContinuity, stitch_split_page_minimum_continuity),
+    stitch_split_page_sample_columns = coalesce(:stitchSplitPageSampleColumns, stitch_split_page_sample_columns),
+    stitch_split_page_sample_rows = coalesce(:stitchSplitPageSampleRows, stitch_split_page_sample_rows)
 WHERE _id = :mangaId;
 
 selectLastInsertedRowId:

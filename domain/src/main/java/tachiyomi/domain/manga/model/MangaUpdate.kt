@@ -27,6 +27,14 @@ data class MangaUpdate(
     val notes: String? = null,
     // SY -->
     val filteredScanlators: List<String>? = null,
+    val stitchSplitPageMode: Int? = null,
+    val stitchSplitPageThreshold: Int? = null,
+    val stitchSplitPageMaxHeightRatio: Int? = null,
+    val stitchSplitPageMinimumEdgeVariance: Int? = null,
+    val stitchSplitPageContinuityMultiplier: Int? = null,
+    val stitchSplitPageMinimumContinuity: Int? = null,
+    val stitchSplitPageSampleColumns: Int? = null,
+    val stitchSplitPageSampleRows: Int? = null,
     // SY <--
 )
 
@@ -51,6 +59,14 @@ fun Manga.toMangaUpdate(): MangaUpdate {
         description = ogDescription,
         genre = ogGenre,
         status = ogStatus,
+        stitchSplitPageMode = stitchSplitPageMode,
+        stitchSplitPageThreshold = stitchSplitPageThreshold,
+        stitchSplitPageMaxHeightRatio = stitchSplitPageMaxHeightRatio,
+        stitchSplitPageMinimumEdgeVariance = stitchSplitPageMinimumEdgeVariance,
+        stitchSplitPageContinuityMultiplier = stitchSplitPageContinuityMultiplier,
+        stitchSplitPageMinimumContinuity = stitchSplitPageMinimumContinuity,
+        stitchSplitPageSampleColumns = stitchSplitPageSampleColumns,
+        stitchSplitPageSampleRows = stitchSplitPageSampleRows,
         // SY <--
         updateStrategy = updateStrategy,
         initialized = initialized,

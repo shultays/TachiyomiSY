@@ -166,6 +166,14 @@ class MangaRestorer(
                 version = manga.version,
                 isSyncing = 1,
                 notes = manga.notes,
+                stitchSplitPageMode = manga.stitchSplitPageMode.toLong(),
+                stitchSplitPageThreshold = manga.stitchSplitPageThreshold.toLong(),
+                stitchSplitPageMaxHeightRatio = manga.stitchSplitPageMaxHeightRatio.toLong(),
+                stitchSplitPageMinimumEdgeVariance = manga.stitchSplitPageMinimumEdgeVariance.toLong(),
+                stitchSplitPageContinuityMultiplier = manga.stitchSplitPageContinuityMultiplier.toLong(),
+                stitchSplitPageMinimumContinuity = manga.stitchSplitPageMinimumContinuity.toLong(),
+                stitchSplitPageSampleColumns = manga.stitchSplitPageSampleColumns.toLong(),
+                stitchSplitPageSampleRows = manga.stitchSplitPageSampleRows.toLong(),
             )
         }
         return manga

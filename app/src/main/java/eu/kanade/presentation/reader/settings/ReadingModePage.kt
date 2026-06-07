@@ -183,83 +183,86 @@ private fun ColumnScope.PagerViewerSettings(
         }
     }
 
-    val splitPageStitchMode by screenModel.preferences.splitPageStitchMode.collectAsState()
+    // SY -->
+    val manga by screenModel.mangaFlow.collectAsState()
+    val mangaStitchMode = manga?.stitchSplitPageMode ?: PagerConfig.SplitPageStitchMode.NONE
+    // SY <--
     SettingsChipRow(SYMR.strings.pref_stitch_split_pages) {
         ReaderPreferences.SplitPageStitchModes.mapIndexed { index, it ->
             FilterChip(
-                selected = PagerConfig.SplitPageStitchMode.normalize(splitPageStitchMode) == index,
-                onClick = { screenModel.preferences.splitPageStitchMode.set(index) },
+                selected = PagerConfig.SplitPageStitchMode.normalize(mangaStitchMode) == index,
+                onClick = { screenModel.setStitchSplitPageMode(index) },
                 label = { Text(stringResource(it)) },
             )
         }
     }
 
-    if (PagerConfig.SplitPageStitchMode.normalize(splitPageStitchMode) != PagerConfig.SplitPageStitchMode.NONE) {
-        val splitPageStitchThreshold by screenModel.preferences.splitPageStitchThreshold.collectAsState()
+    if (PagerConfig.SplitPageStitchMode.normalize(mangaStitchMode) != PagerConfig.SplitPageStitchMode.NONE) {
+        val mangaStitchThreshold = manga?.stitchSplitPageThreshold ?: PagerConfig.SplitPageStitchThreshold.DEFAULT
         SliderItem(
-            value = splitPageStitchThreshold,
+            value = mangaStitchThreshold,
             valueRange = PagerConfig.SplitPageStitchThreshold.MIN..PagerConfig.SplitPageStitchThreshold.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_threshold),
-            valueString = "$splitPageStitchThreshold%",
-            onChange = screenModel.preferences.splitPageStitchThreshold::set,
+            valueString = "$mangaStitchThreshold%",
+            onChange = screenModel::setStitchSplitPageThreshold,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageStitchMaxHeightRatio by screenModel.preferences.splitPageStitchMaxHeightRatio.collectAsState()
+        val mangaStitchMaxHeightRatio = manga?.stitchSplitPageMaxHeightRatio ?: PagerConfig.SplitPageStitchMaxHeightRatio.DEFAULT
         SliderItem(
-            value = splitPageStitchMaxHeightRatio,
+            value = mangaStitchMaxHeightRatio,
             valueRange = PagerConfig.SplitPageStitchMaxHeightRatio.MIN..PagerConfig.SplitPageStitchMaxHeightRatio.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_max_height_ratio),
-            valueString = "%.2f".format(splitPageStitchMaxHeightRatio / 100f),
-            onChange = screenModel.preferences.splitPageStitchMaxHeightRatio::set,
+            valueString = "%.2f".format(mangaStitchMaxHeightRatio / 100f),
+            onChange = screenModel::setStitchSplitPageMaxHeightRatio,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageStitchMinimumEdgeVariance by screenModel.preferences.splitPageStitchMinimumEdgeVariance.collectAsState()
+        val mangaStitchMinimumEdgeVariance = manga?.stitchSplitPageMinimumEdgeVariance ?: PagerConfig.SplitPageStitchMinimumEdgeVariance.DEFAULT
         SliderItem(
-            value = splitPageStitchMinimumEdgeVariance,
+            value = mangaStitchMinimumEdgeVariance,
             valueRange = PagerConfig.SplitPageStitchMinimumEdgeVariance.MIN..PagerConfig.SplitPageStitchMinimumEdgeVariance.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_minimum_edge_variance),
-            valueString = "%.1f%%".format(splitPageStitchMinimumEdgeVariance / 10f),
-            onChange = screenModel.preferences.splitPageStitchMinimumEdgeVariance::set,
+            valueString = "%.1f%%".format(mangaStitchMinimumEdgeVariance / 10f),
+            onChange = screenModel::setStitchSplitPageMinimumEdgeVariance,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageStitchContinuityMultiplier by screenModel.preferences.splitPageStitchContinuityMultiplier.collectAsState()
+        val mangaStitchContinuityMultiplier = manga?.stitchSplitPageContinuityMultiplier ?: PagerConfig.SplitPageStitchContinuityMultiplier.DEFAULT
         SliderItem(
-            value = splitPageStitchContinuityMultiplier,
+            value = mangaStitchContinuityMultiplier,
             valueRange = PagerConfig.SplitPageStitchContinuityMultiplier.MIN..PagerConfig.SplitPageStitchContinuityMultiplier.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_continuity_multiplier),
-            valueString = "%.1fx".format(splitPageStitchContinuityMultiplier / 100f),
-            onChange = screenModel.preferences.splitPageStitchContinuityMultiplier::set,
+            valueString = "%.1fx".format(mangaStitchContinuityMultiplier / 100f),
+            onChange = screenModel::setStitchSplitPageContinuityMultiplier,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageStitchMinimumContinuity by screenModel.preferences.splitPageStitchMinimumContinuity.collectAsState()
+        val mangaStitchMinimumContinuity = manga?.stitchSplitPageMinimumContinuity ?: PagerConfig.SplitPageStitchMinimumContinuity.DEFAULT
         SliderItem(
-            value = splitPageStitchMinimumContinuity,
+            value = mangaStitchMinimumContinuity,
             valueRange = PagerConfig.SplitPageStitchMinimumContinuity.MIN..PagerConfig.SplitPageStitchMinimumContinuity.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_minimum_continuity),
-            valueString = "%.1f%%".format(splitPageStitchMinimumContinuity / 10f),
-            onChange = screenModel.preferences.splitPageStitchMinimumContinuity::set,
+            valueString = "%.1f%%".format(mangaStitchMinimumContinuity / 10f),
+            onChange = screenModel::setStitchSplitPageMinimumContinuity,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageStitchSampleColumns by screenModel.preferences.splitPageStitchSampleColumns.collectAsState()
+        val mangaStitchSampleColumns = manga?.stitchSplitPageSampleColumns ?: PagerConfig.SplitPageStitchSampleColumns.DEFAULT
         SliderItem(
-            value = splitPageStitchSampleColumns,
+            value = mangaStitchSampleColumns,
             valueRange = PagerConfig.SplitPageStitchSampleColumns.MIN..PagerConfig.SplitPageStitchSampleColumns.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_sample_columns),
-            onChange = screenModel.preferences.splitPageStitchSampleColumns::set,
+            onChange = screenModel::setStitchSplitPageSampleColumns,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 
-        val splitPageStitchSampleRows by screenModel.preferences.splitPageStitchSampleRows.collectAsState()
+        val mangaStitchSampleRows = manga?.stitchSplitPageSampleRows ?: PagerConfig.SplitPageStitchSampleRows.DEFAULT
         SliderItem(
-            value = splitPageStitchSampleRows,
+            value = mangaStitchSampleRows,
             valueRange = PagerConfig.SplitPageStitchSampleRows.MIN..PagerConfig.SplitPageStitchSampleRows.MAX,
             label = stringResource(SYMR.strings.stitch_split_pages_sample_rows),
-            onChange = screenModel.preferences.splitPageStitchSampleRows::set,
+            onChange = screenModel::setStitchSplitPageSampleRows,
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         )
 

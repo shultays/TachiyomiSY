@@ -187,78 +187,6 @@ class PagerConfig(
         readerPreferences.centerMarginType
             .register({ centerMarginType = it }, { imagePropertyChangedListener?.invoke() })
 
-        readerPreferences.splitPageStitchMode
-            .register(
-                { splitPageStitchMode = SplitPageStitchMode.normalize(it) },
-                {
-                    splitPageStitchMode = SplitPageStitchMode.normalize(it)
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchThreshold
-            .register(
-                { splitPageStitchThreshold = it },
-                {
-                    splitPageStitchThreshold = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchMaxHeightRatio
-            .register(
-                { splitPageStitchMaxHeightRatio = it },
-                {
-                    splitPageStitchMaxHeightRatio = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchMinimumEdgeVariance
-            .register(
-                { splitPageStitchMinimumEdgeVariance = it },
-                {
-                    splitPageStitchMinimumEdgeVariance = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchContinuityMultiplier
-            .register(
-                { splitPageStitchContinuityMultiplier = it },
-                {
-                    splitPageStitchContinuityMultiplier = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchMinimumContinuity
-            .register(
-                { splitPageStitchMinimumContinuity = it },
-                {
-                    splitPageStitchMinimumContinuity = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchSampleColumns
-            .register(
-                { splitPageStitchSampleColumns = it },
-                {
-                    splitPageStitchSampleColumns = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
-        readerPreferences.splitPageStitchSampleRows
-            .register(
-                { splitPageStitchSampleRows = it },
-                {
-                    splitPageStitchSampleRows = it
-                    splitPageStitchChangedListener?.invoke()
-                },
-            )
-
         readerPreferences.invertDoublePages
             .register({ invertDoublePages = it && dualPageSplit == false }, { imagePropertyChangedListener?.invoke() })
         // SY <--
@@ -347,13 +275,13 @@ class PagerConfig(
     object SplitPageStitchContinuityMultiplier {
         const val MIN = 100
         const val MAX = 800
-        const val DEFAULT = 300
+        const val DEFAULT = 600
     }
 
     object SplitPageStitchMinimumContinuity {
         const val MIN = 0
-        const val MAX = 200
-        const val DEFAULT = 35
+        const val MAX = 600
+        const val DEFAULT = 200
     }
 
     object SplitPageStitchSampleColumns {
@@ -367,6 +295,25 @@ class PagerConfig(
         const val MAX = 16
         const val DEFAULT = 6
     }
+
+    // SY -->
+    fun loadMangaStitchSettings(
+        manga: tachiyomi.domain.manga.model.Manga,
+        notifyChanged: Boolean = true,
+    ) {
+        splitPageStitchMode = SplitPageStitchMode.normalize(manga.stitchSplitPageMode)
+        splitPageStitchThreshold = manga.stitchSplitPageThreshold
+        splitPageStitchMaxHeightRatio = manga.stitchSplitPageMaxHeightRatio
+        splitPageStitchMinimumEdgeVariance = manga.stitchSplitPageMinimumEdgeVariance
+        splitPageStitchContinuityMultiplier = manga.stitchSplitPageContinuityMultiplier
+        splitPageStitchMinimumContinuity = manga.stitchSplitPageMinimumContinuity
+        splitPageStitchSampleColumns = manga.stitchSplitPageSampleColumns
+        splitPageStitchSampleRows = manga.stitchSplitPageSampleRows
+        if (notifyChanged) {
+            splitPageStitchChangedListener?.invoke()
+        }
+    }
+    // SY <--
 
     internal fun splitPageDetectorConfig() = SplitPageDetector.Config(
         thresholdPercent = splitPageStitchThreshold,
