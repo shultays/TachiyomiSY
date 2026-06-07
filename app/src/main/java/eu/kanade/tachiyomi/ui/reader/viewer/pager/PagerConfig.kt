@@ -75,6 +75,8 @@ class PagerConfig(
 
     var centerMarginType = CenterMarginType.NONE
 
+    var splitPageMergeMode = SplitPageMergeMode.NONE
+
     // SY <--
 
     init {
@@ -169,6 +171,15 @@ class PagerConfig(
         readerPreferences.centerMarginType
             .register({ centerMarginType = it }, { imagePropertyChangedListener?.invoke() })
 
+        readerPreferences.splitPageMergeMode
+            .register(
+                { splitPageMergeMode = it },
+                {
+                    splitPageMergeMode = it
+                    reloadChapterListener?.invoke(doublePages)
+                },
+            )
+
         readerPreferences.invertDoublePages
             .register({ invertDoublePages = it && dualPageSplit == false }, { imagePropertyChangedListener?.invoke() })
         // SY <--
@@ -227,6 +238,12 @@ class PagerConfig(
         const val SINGLE_PAGE = 0
         const val DOUBLE_PAGES = 1
         const val AUTOMATIC = 2
+    }
+
+    object SplitPageMergeMode {
+        const val NONE = 0
+        const val TWO = 1
+        const val SEVERAL = 2
     }
 
     fun themeToColor(theme: Int) {

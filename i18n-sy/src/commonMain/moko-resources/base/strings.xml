@@ -381,6 +381,10 @@
     <string name="center_margin_double_and_wide_page">Add to both</string>
     <string name="pref_center_margin">Center margin type</string>
     <string name="pref_center_margin_summary">Insert spacer to accommodate deadspace on foldable devices.</string>
+    <string name="pref_merge_split_pages">Merge split pages</string>
+    <string name="merge_split_pages_none">None</string>
+    <string name="merge_split_pages_two">Two images</string>
+    <string name="merge_split_pages_several">Several images</string>
 
     <!-- Archive reader mode -->
     <string name="archive_mode_load_from_file">Load from file</string>

@@ -173,6 +173,17 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
             )
         }
     }
+
+    val splitPageMergeMode by screenModel.preferences.splitPageMergeMode.collectAsState()
+    SettingsChipRow(SYMR.strings.pref_merge_split_pages) {
+        ReaderPreferences.SplitPageMergeModes.mapIndexed { index, it ->
+            FilterChip(
+                selected = splitPageMergeMode == index,
+                onClick = { screenModel.preferences.splitPageMergeMode.set(index) },
+                label = { Text(stringResource(it)) },
+            )
+        }
+    }
     // SY <--
 }
 

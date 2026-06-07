@@ -584,7 +584,7 @@ class ReaderViewModel @JvmOverloads constructor(
      * read, update tracking services, enqueue downloaded chapter deletion, and updating the active chapter if this
      * [page]'s chapter is different from the currently active.
      */
-    fun onPageSelected(page: ReaderPage, currentPageText: String /* SY --> */, hasExtraPage: Boolean /* SY <-- */) {
+    fun onPageSelected(page: ReaderPage, currentPageText: String /* SY --> */, pageCount: Int /* SY <-- */) {
         // InsertPage doesn't change page progress
         if (page is InsertPage) {
             return
@@ -599,7 +599,7 @@ class ReaderViewModel @JvmOverloads constructor(
 
         // Save last page read and mark as read if needed
         viewModelScope.launchNonCancellable {
-            updateChapterProgress(selectedChapter, page/* SY --> */, hasExtraPage/* SY <-- */)
+            updateChapterProgress(selectedChapter, page/* SY --> */, pageCount/* SY <-- */)
         }
 
         if (selectedChapter != getCurrentChapter()) {
@@ -688,7 +688,7 @@ class ReaderViewModel @JvmOverloads constructor(
     private suspend fun updateChapterProgress(
         readerChapter: ReaderChapter,
         page: Page/* SY --> */,
-        hasExtraPage: Boolean, /* SY <-- */
+        pageCount: Int, /* SY <-- */
     ) {
         val pageIndex = page.index
         val syncTriggerOpt = syncPreferences.getSyncTriggerOptions()
@@ -705,8 +705,7 @@ class ReaderViewModel @JvmOverloads constructor(
 
             // SY -->
             if (
-                readerChapter.pages?.lastIndex == pageIndex ||
-                (hasExtraPage && readerChapter.pages?.lastIndex?.minus(1) == page.index)
+                page.index + pageCount - 1 >= (readerChapter.pages?.lastIndex ?: Int.MAX_VALUE)
             ) {
                 // SY <--
                 updateChapterProgressOnComplete(readerChapter)

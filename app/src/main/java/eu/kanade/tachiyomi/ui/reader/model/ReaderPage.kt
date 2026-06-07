@@ -25,4 +25,7 @@ open class ReaderPage(
             field = value
             if (value) shiftedPage = false
         }
+
+    /** Cached result of checking whether this image continues into the next source page. */
+    var splitPageNext: Boolean? = null
 }

@@ -42,13 +42,24 @@ class PagerPageHolder(
     val viewer: PagerViewer,
     val page: ReaderPage,
     private var extraPage: ReaderPage? = null,
+    splitPages: List<ReaderPage> = emptyList(),
+    private val splitCandidate: ReaderPage? = null,
 ) : ReaderPageImageView(readerThemedContext), ViewPagerAdapter.PositionableView {
+
+    private val displayedPages = splitPages.ifEmpty { listOfNotNull(page, extraPage) }
+    private val splitDetectionPage = displayedPages.last()
+    private val joinedItem = PagerViewerAdapter.JoinedItem(
+        first = page,
+        second = extraPage,
+        splitPages = splitPages,
+        splitCandidate = splitCandidate,
+    )
 
     /**
      * Item that identifies this view. Needed by the adapter to not recreate views.
      */
     override val item
-        get() = page to extraPage
+        get() = joinedItem
 
     /**
      * Loading progress bar to indicate the current progress.
@@ -65,16 +76,17 @@ class PagerPageHolder(
     /**
      * Job for loading the page and processing changes to the page's status.
      */
-    private var loadJob: Job? = null
-
-    /**
-     * Job for loading the page.
-     */
-    private var extraLoadJob: Job? = null
+    private val loadJobs = mutableListOf<Job>()
+    private val readyPages = mutableSetOf<ReaderPage>()
+    private var rendered = false
+    private var detectionStarted = false
 
     init {
-        loadJob = scope.launch { loadPageAndProcessStatus(1) }
-        extraLoadJob = scope.launch { loadPageAndProcessStatus(2) }
+        (displayedPages + listOfNotNull(splitCandidate)).distinct().forEach { readerPage ->
+            loadJobs += scope.launch {
+                loadPageAndProcessStatus(readerPage, readerPage == splitCandidate)
+            }
+        }
     }
 
     /**
@@ -83,10 +95,8 @@ class PagerPageHolder(
     @SuppressLint("ClickableViewAccessibility")
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        loadJob?.cancel()
-        loadJob = null
-        extraLoadJob?.cancel()
-        extraLoadJob = null
+        loadJobs.forEach { it.cancel() }
+        loadJobs.clear()
     }
 
     private fun initProgressIndicator() {
@@ -103,11 +113,7 @@ class PagerPageHolder(
      * Otherwise, this function does not return. It will continue to process status changes until
      * the Job is cancelled.
      */
-    private suspend fun loadPageAndProcessStatus(pageIndex: Int) {
-        // SY -->
-        val page = if (pageIndex == 1) page else extraPage
-        page ?: return
-        // SY <--
+    private suspend fun loadPageAndProcessStatus(page: ReaderPage, detectionOnly: Boolean) {
         val loader = page.chapter.pageLoader ?: return
         supervisorScope {
             launchIO {
@@ -123,10 +129,36 @@ class PagerPageHolder(
                             progressIndicator?.setProgress(value)
                         }
                     }
-                    Page.State.Ready -> setImage()
-                    is Page.State.Error -> setError(state.error)
+                    Page.State.Ready -> onPageReady(page)
+                    is Page.State.Error -> {
+                        if (detectionOnly) {
+                            viewer.onSplitPageDetection(splitDetectionPage, false)
+                        } else {
+                            setError(state.error)
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    private fun onPageReady(readyPage: ReaderPage) {
+        readyPages += readyPage
+        if (splitCandidate != null) {
+            if (
+                !detectionStarted &&
+                readyPages.contains(splitDetectionPage) &&
+                readyPages.contains(splitCandidate)
+            ) {
+                detectionStarted = true
+                scope.launch { detectSplitPage(splitCandidate) }
+            }
+            return
+        }
+
+        if (!rendered && readyPages.containsAll(displayedPages)) {
+            rendered = true
+            scope.launch { setImage() }
         }
     }
 
@@ -167,32 +199,53 @@ class PagerPageHolder(
             progressIndicator?.setProgress(95)
         }
 
-        val streamFn = page.stream ?: return
-        val streamFn2 = extraPage?.stream
-
         try {
             val (source, isAnimated, background) = withIOContext {
-                streamFn().buffered(16).use { source ->
-                    // SY -->
-                    if (extraPage != null) {
-                        streamFn2?.invoke()
-                            ?.buffered(16)
+                if (displayedPages.size > 1 && extraPage == null) {
+                    val bitmaps = displayedPages.map { readerPage ->
+                        val streamFn = readerPage.stream ?: error("Page stream is unavailable")
+                        streamFn().buffered(16).use { source ->
+                            decodeImage(Buffer().readFrom(source)) ?: error("Cannot decode split page")
+                        }
+                    }
+                    val itemSource = try {
+                        ImageUtil.mergeBitmapsVertically(
+                            bitmaps,
+                            viewer.config.pageCanvasColor,
+                            ::updateProgress,
+                        )
+                    } finally {
+                        bitmaps.forEach { it.recycle() }
+                    }
+                    val background = if (viewer.config.automaticBackground) {
+                        ImageUtil.chooseBackground(context, itemSource.peek())
                     } else {
                         null
-                    }.use { source2 ->
-                        val itemSource = if (viewer.config.dualPageSplit) {
-                            process(item.first, Buffer().readFrom(source))
-                        } else {
-                            mergePages(Buffer().readFrom(source), source2?.let { Buffer().readFrom(it) })
-                        }
-                        // SY <--
-                        val isAnimated = ImageUtil.isAnimatedAndSupported(itemSource)
-                        val background = if (!isAnimated && viewer.config.automaticBackground) {
-                            ImageUtil.chooseBackground(context, itemSource.peek())
+                    }
+                    Triple(itemSource, false, background)
+                } else {
+                    val streamFn = page.stream ?: error("Page stream is unavailable")
+                    val streamFn2 = extraPage?.stream
+                    streamFn().buffered(16).use { source ->
+                        if (extraPage != null) {
+                            streamFn2?.invoke()?.buffered(16)
                         } else {
                             null
+                        }.use { source2 ->
+                            val itemSource = if (viewer.config.dualPageSplit) {
+                                process(page, Buffer().readFrom(source))
+                            } else {
+                                mergePages(Buffer().readFrom(source), source2?.let { Buffer().readFrom(it) })
+                            }
+                            // SY <--
+                            val isAnimated = ImageUtil.isAnimatedAndSupported(itemSource)
+                            val background = if (!isAnimated && viewer.config.automaticBackground) {
+                                ImageUtil.chooseBackground(context, itemSource.peek())
+                            } else {
+                                null
+                            }
+                            Triple(itemSource, isAnimated, background)
                         }
-                        Triple(itemSource, isAnimated, background)
                     }
                 }
             }
@@ -219,6 +272,34 @@ class PagerPageHolder(
                 setError(e)
             }
         }
+    }
+
+    private suspend fun detectSplitPage(candidate: ReaderPage) {
+        val merges = withIOContext {
+            val firstStream = splitDetectionPage.stream ?: return@withIOContext false
+            val secondStream = candidate.stream ?: return@withIOContext false
+            firstStream().buffered(16).use { first ->
+                secondStream().buffered(16).use { second ->
+                    val firstSource = Buffer().readFrom(first)
+                    val secondSource = Buffer().readFrom(second)
+                    if (
+                        ImageUtil.isAnimatedAndSupported(firstSource) ||
+                        ImageUtil.isAnimatedAndSupported(secondSource)
+                    ) {
+                        return@withIOContext false
+                    }
+                    val firstBitmap = decodeImage(firstSource, sampleSize = 8) ?: return@withIOContext false
+                    val secondBitmap = decodeImage(secondSource, sampleSize = 8) ?: return@withIOContext false
+                    try {
+                        SplitPageDetector.shouldMerge(firstBitmap, secondBitmap)
+                    } finally {
+                        firstBitmap.recycle()
+                        secondBitmap.recycle()
+                    }
+                }
+            }
+        }
+        viewer.onSplitPageDetection(splitDetectionPage, merges)
     }
 
     private fun process(page: ReaderPage, imageSource: BufferedSource): BufferedSource {
@@ -332,9 +413,9 @@ class PagerPageHolder(
         }
     }
 
-    private fun decodeImage(imageSource: BufferedSource): Bitmap? {
+    private fun decodeImage(imageSource: BufferedSource, sampleSize: Int = 1): Bitmap? {
         return try {
-            ImageDecoder.newInstance(imageSource.inputStream())?.decode()
+            ImageDecoder.newInstance(imageSource.inputStream())?.decode(sampleSize = sampleSize)
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e) { "Cannot decode image" }
             null

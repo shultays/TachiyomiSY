@@ -801,6 +801,32 @@ object ImageUtil {
         return output
     }
 
+    fun mergeBitmapsVertically(
+        bitmaps: List<Bitmap>,
+        @ColorInt backgroundColor: Int,
+        progressCallback: (Int) -> Unit,
+    ): BufferedSource {
+        require(bitmaps.isNotEmpty())
+        val width = bitmaps.maxOf { it.width }
+        val height = bitmaps.sumOf { it.height }
+        val result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+        result.applyCanvas {
+            drawColor(backgroundColor)
+            var top = 0
+            bitmaps.forEachIndexed { index, bitmap ->
+                drawBitmap(bitmap, ((width - bitmap.width) / 2f), top.toFloat(), null)
+                top += bitmap.height
+                progressCallback(97 + ((index + 1) * 2 / bitmaps.size))
+            }
+        }
+
+        val output = Buffer()
+        result.compress(Bitmap.CompressFormat.JPEG, 100, output.outputStream())
+        progressCallback(100)
+        return output
+    }
+
     private val Bitmap.rect: Rect
         get() = Rect(0, 0, width, height)
     // SY <--

@@ -217,6 +217,9 @@ class ReaderPreferences(
 
     val centerMarginType: Preference<Int> = preferenceStore.getInt("center_margin_type", PagerConfig.CenterMarginType.NONE)
 
+    val splitPageMergeMode: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_mode", PagerConfig.SplitPageMergeMode.NONE)
+
     val archiveReaderMode: Preference<Int> = preferenceStore.getInt("archive_reader_mode", ArchiveReaderMode.LOAD_FROM_FILE)
     // SY <--
 
@@ -312,6 +315,12 @@ class ReaderPreferences(
             SYMR.strings.center_margin_double_page,
             SYMR.strings.center_margin_wide_page,
             SYMR.strings.center_margin_double_and_wide_page,
+        )
+
+        val SplitPageMergeModes = listOf(
+            SYMR.strings.merge_split_pages_none,
+            SYMR.strings.merge_split_pages_two,
+            SYMR.strings.merge_split_pages_several,
         )
 
         val archiveModeTypes = listOf(

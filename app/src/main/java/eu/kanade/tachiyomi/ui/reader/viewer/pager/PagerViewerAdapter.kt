@@ -20,10 +20,25 @@ import tachiyomi.core.common.util.system.logcat
  */
 class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
 
+    data class JoinedItem(
+        val first: ReaderItem,
+        val second: ReaderItem? = null,
+        val splitPages: List<ReaderPage> = emptyList(),
+        val splitCandidate: ReaderPage? = null,
+    ) {
+        fun contains(item: ReaderItem): Boolean =
+            first == item || second == item || splitPages.contains(item)
+
+        fun pages(): List<ReaderPage> = when {
+            splitPages.isNotEmpty() -> splitPages
+            else -> listOfNotNull(first as? ReaderPage, second as? ReaderPage)
+        }
+    }
+
     /**
      * Paired list of currently set items.
      */
-    var joinedItems: MutableList<Pair<ReaderItem, ReaderItem?>> = mutableListOf()
+    var joinedItems: MutableList<JoinedItem> = mutableListOf()
         private set
 
     /**
@@ -147,10 +162,18 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
      * Creates a new view for the item at the given [position].
      */
     override fun createView(container: ViewGroup, position: Int): View {
-        val item = joinedItems[position].first
-        val item2 = joinedItems[position].second
+        val joinedItem = joinedItems[position]
+        val item = joinedItem.first
+        val item2 = joinedItem.second
         return when (item) {
-            is ReaderPage -> PagerPageHolder(readerThemedContext, viewer, item, item2 as? ReaderPage)
+            is ReaderPage -> PagerPageHolder(
+                readerThemedContext,
+                viewer,
+                item,
+                item2 as? ReaderPage,
+                joinedItem.splitPages,
+                joinedItem.splitCandidate,
+            )
             is ChapterTransition -> PagerTransitionHolder(readerThemedContext, viewer, item)
             // SY --> else -> throw NotImplementedError("Holder for ${item.javaClass} not implemented") SY <--
         }
@@ -199,7 +222,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             return
         }
 
-        joinedItems.add(placeAtIndex, newPage to null)
+        joinedItems.add(placeAtIndex, JoinedItem(newPage))
 
         notifyDataSetChanged()
     }
@@ -217,14 +240,14 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     // SY -->
     private fun setJoinedItems(useSecondPage: Boolean = false) {
         val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
-        if (!viewer.config.doublePages) {
+        if (!viewer.config.doublePages || viewer.config.splitPageMergeMode != PagerConfig.SplitPageMergeMode.NONE) {
             // If not in double mode, set up items like before
             subItems.forEach { readerItem ->
                 if (readerItem is ReaderPage) {
                     readerItem.shiftedPage = false
                 }
             }
-            this.joinedItems = subItems.map { Pair(it, null) }.toMutableList()
+            this.joinedItems = buildSplitPageItems()
             if (viewer is R2LPagerViewer) {
                 joinedItems.reverse()
             }
@@ -251,7 +274,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 }
             }
 
-            val subJoinedItems = mutableListOf<Pair<ReaderItem, ReaderItem?>>()
+            val subJoinedItems = mutableListOf<JoinedItem>()
 
             // Step 2: run through each set of pages
             pagedItems.forEach { items ->
@@ -310,11 +333,11 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
 
                 // Step 5: chunk em
                 if (items.isNotEmpty()) {
-                    subJoinedItems.addAll(items.chunked(2).map { Pair(it.first()!!, it.getOrNull(1)) })
+                    subJoinedItems.addAll(items.chunked(2).map { JoinedItem(it.first()!!, it.getOrNull(1)) })
                 }
 
                 otherItems.getOrNull(pagedItems.indexOf(items))?.let {
-                    subJoinedItems.add(Pair(it, null))
+                    subJoinedItems.add(JoinedItem(it))
                 }
             }
 
@@ -338,10 +361,10 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 subItems.find { it is ReaderPage && it.chapter == currentChapter }
             useSecondPage -> oldCurrent?.second ?: oldCurrent?.first
             else -> oldCurrent?.first ?: return
-        }
+        } ?: return
 
         val index = when {
-            newPage is ChapterTransition && joinedItems.none { it.first == newPage || it.second == newPage } -> {
+            newPage is ChapterTransition && joinedItems.none { it.contains(newPage) } -> {
                 val filteredPages = joinedItems.filter {
                     it.first is ReaderPage &&
                         (it.first as ReaderPage).chapter == newPage.to
@@ -351,12 +374,78 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 } else {
                     filteredPages.maxByOrNull { (it.first as ReaderPage).index }?.first
                 }
-                joinedItems.indexOfFirst { it.first == page || it.second == page }
+                page?.let { target -> joinedItems.indexOfFirst { it.contains(target) } } ?: -1
             }
-            else -> joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
+            else -> joinedItems.indexOfFirst { it.contains(newPage) }
         }
 
         viewer.pager.setCurrentItem(index, false)
+    }
+
+    private fun buildSplitPageItems(): MutableList<JoinedItem> {
+        if (viewer.config.splitPageMergeMode == PagerConfig.SplitPageMergeMode.NONE) {
+            return subItems.map { JoinedItem(it) }.toMutableList()
+        }
+
+        val result = mutableListOf<JoinedItem>()
+        var index = 0
+        while (index < subItems.size) {
+            val item = subItems[index]
+            if (item !is ReaderPage) {
+                result += JoinedItem(item)
+                index++
+                continue
+            }
+
+            val pages = mutableListOf(item)
+            val maximum = if (viewer.config.splitPageMergeMode == PagerConfig.SplitPageMergeMode.TWO) 2 else Int.MAX_VALUE
+            while (pages.size < maximum) {
+                val next = subItems.getOrNull(index + pages.size) as? ReaderPage ?: break
+                if (next.chapter.chapter.id != item.chapter.chapter.id || pages.last().splitPageNext != true) break
+                pages += next
+            }
+
+            val candidate = (subItems.getOrNull(index + pages.size) as? ReaderPage)
+                ?.takeIf { it.chapter.chapter.id == item.chapter.chapter.id && pages.last().splitPageNext == null }
+
+            if (
+                viewer.config.doublePages &&
+                pages.size == 1 &&
+                candidate == null &&
+                item.splitPageNext == false &&
+                !item.fullPage
+            ) {
+                val next = subItems.getOrNull(index + 1) as? ReaderPage
+                val nextCanBePaired = next?.let {
+                    it.chapter.chapter.id == item.chapter.chapter.id &&
+                        (
+                        it.splitPageNext == false ||
+                            subItems.getOrNull(index + 2) !is ReaderPage ||
+                            (subItems[index + 2] as ReaderPage).chapter.chapter.id != item.chapter.chapter.id
+                        ) &&
+                        !it.fullPage
+                } == true
+                if (nextCanBePaired) {
+                    result += JoinedItem(first = item, second = next)
+                    index += 2
+                    continue
+                }
+            }
+
+            result += JoinedItem(
+                first = item,
+                splitPages = pages.takeIf { it.size > 1 }.orEmpty(),
+                splitCandidate = candidate,
+            )
+            index += pages.size
+        }
+        return result
+    }
+
+    fun onSplitPageDetection(page: ReaderPage, mergesWithNext: Boolean) {
+        if (page.splitPageNext == mergesWithNext) return
+        page.splitPageNext = mergesWithNext
+        setJoinedItems()
     }
 
     fun splitDoublePages(current: ReaderPage) {
