@@ -2,6 +2,11 @@
 <resources>
     <string name="app_name" translatable="false">TachiyomiSY</string>
 
+    <string name="blacklisted_pages">Blacklisted pages</string>
+    <string name="blacklist_current_page">Blacklist current page</string>
+    <string name="no_blacklisted_pages">No pages have been blacklisted for this manga.</string>
+    <string name="blacklisted_page_number">Blacklisted page %1$d</string>
+
     <!-- Generic strings -->
     <string name="on">On</string>
     <string name="off">Off</string>

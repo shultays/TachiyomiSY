@@ -201,6 +201,14 @@ class PagerPageHolder(
         }
 
         try {
+            val blacklistedPage = displayedPages.firstOrNull { page ->
+                viewer.activity.viewModel.isPageBlacklisted(page)
+            }
+            if (blacklistedPage != null) {
+                blacklistedPage.isBlacklisted = true
+                withUIContext { viewer.onPageBlacklisted(blacklistedPage) }
+                return
+            }
             val (source, isAnimated, background) = withIOContext {
                 if (displayedPages.size > 1 && extraPage == null) {
                     val bitmaps = displayedPages.map { readerPage ->

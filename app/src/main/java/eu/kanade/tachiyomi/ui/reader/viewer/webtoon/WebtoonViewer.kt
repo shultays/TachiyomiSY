@@ -287,6 +287,13 @@ class WebtoonViewer(
         }
     }
 
+    fun onPageBlacklisted(page: ReaderPage) {
+        val position = adapter.items.indexOf(page)
+        adapter.blacklistPage(page)
+        currentPage = null
+        onScrolled(position.coerceAtMost(adapter.items.lastIndex).coerceAtLeast(0))
+    }
+
     /**
      * Scrolls up by [scrollDistance].
      */

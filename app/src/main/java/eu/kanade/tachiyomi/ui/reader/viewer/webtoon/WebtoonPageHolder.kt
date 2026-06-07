@@ -187,9 +187,15 @@ class WebtoonPageHolder(
     private suspend fun setImage() {
         progressIndicator.setProgress(0)
 
-        val streamFn = page?.stream ?: return
+        val page = page ?: return
+        val streamFn = page.stream ?: return
 
         try {
+            if (viewer.activity.viewModel.isPageBlacklisted(page)) {
+                page.isBlacklisted = true
+                withUIContext { viewer.onPageBlacklisted(page) }
+                return
+            }
             val (source, isAnimated) = withIOContext {
                 val source = streamFn().use { process(Buffer().readFrom(it)) }
                 val isAnimated = ImageUtil.isAnimatedAndSupported(source)
