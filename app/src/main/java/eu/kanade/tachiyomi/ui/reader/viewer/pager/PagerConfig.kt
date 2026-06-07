@@ -334,25 +334,25 @@ class PagerConfig(
 
     object SplitPageMergeMaxHeightRatio {
         const val MIN = 100
-        const val MAX = 300
+        const val MAX = 400
         const val DEFAULT = 175
     }
 
     object SplitPageMergeMinimumEdgeVariance {
         const val MIN = 0
-        const val MAX = 50
+        const val MAX = 100
         const val DEFAULT = 8
     }
 
     object SplitPageMergeContinuityMultiplier {
         const val MIN = 100
-        const val MAX = 500
+        const val MAX = 800
         const val DEFAULT = 300
     }
 
     object SplitPageMergeMinimumContinuity {
         const val MIN = 0
-        const val MAX = 100
+        const val MAX = 200
         const val DEFAULT = 35
     }
 
