@@ -17,11 +17,14 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderItem
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.SplitPageMergeDiagnostics
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
@@ -57,6 +60,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      */
     /* [EXH] private */
     var currentPage: ReaderItem? = null
+
+    private val _splitPageDiagnostics = MutableStateFlow<SplitPageMergeDiagnostics?>(null)
+    val splitPageDiagnostics = _splitPageDiagnostics.asStateFlow()
 
     /**
      * Viewer chapters to set when the pager enters idle mode. Otherwise, if the view was settling
@@ -146,6 +152,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
             activity.reloadChapters(it)
         }
 
+        config.splitPageMergeChangedListener = {
+            adapter.rebuildSplitPageMerges()
+            _splitPageDiagnostics.value = null
+            refreshAdapter()
+        }
+
         config.imagePropertyChangedListener = {
             refreshAdapter()
         }
@@ -187,6 +199,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     fun onPageChange(position: Int) {
         val pagePair = adapter.joinedItems.getOrNull(position)
         val page = pagePair?.first
+        _splitPageDiagnostics.value = (page as? ReaderPage)?.splitPageDiagnostics
         if (page != null && currentPage != page) {
             val allowPreload = checkAllowPreload(page as? ReaderPage)
             val forward = when {
@@ -487,9 +500,17 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         adapter.splitDoublePages(currentPage)
     }
 
-    fun onSplitPageDetection(page: ReaderPage, mergesWithNext: Boolean) {
+    internal fun onSplitPageDetection(
+        page: ReaderPage,
+        mergesWithNext: Boolean,
+        candidate: ReaderPage? = null,
+        detection: PagerPageHolder.SplitPageDetection? = null,
+    ) {
         activity.runOnUiThread {
-            adapter.onSplitPageDetection(page, mergesWithNext)
+            adapter.onSplitPageDetection(page, mergesWithNext, candidate, detection)
+            if (currentPage == page) {
+                _splitPageDiagnostics.value = page.splitPageDiagnostics
+            }
         }
     }
 

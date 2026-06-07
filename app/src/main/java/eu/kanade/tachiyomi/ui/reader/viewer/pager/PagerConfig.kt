@@ -37,6 +37,8 @@ class PagerConfig(
 
     var reloadChapterListener: ((Boolean) -> Unit)? = null
 
+    var splitPageMergeChangedListener: (() -> Unit)? = null
+
     var imageScaleType = 1
         private set
 
@@ -76,6 +78,20 @@ class PagerConfig(
     var centerMarginType = CenterMarginType.NONE
 
     var splitPageMergeMode = SplitPageMergeMode.NONE
+
+    var splitPageMergeThreshold = SplitPageMergeThreshold.DEFAULT
+
+    var splitPageMergeMaxHeightRatio = SplitPageMergeMaxHeightRatio.DEFAULT
+
+    var splitPageMergeMinimumEdgeVariance = SplitPageMergeMinimumEdgeVariance.DEFAULT
+
+    var splitPageMergeContinuityMultiplier = SplitPageMergeContinuityMultiplier.DEFAULT
+
+    var splitPageMergeMinimumContinuity = SplitPageMergeMinimumContinuity.DEFAULT
+
+    var splitPageMergeSampleColumns = SplitPageMergeSampleColumns.DEFAULT
+
+    var splitPageMergeSampleRows = SplitPageMergeSampleRows.DEFAULT
 
     // SY <--
 
@@ -173,10 +189,73 @@ class PagerConfig(
 
         readerPreferences.splitPageMergeMode
             .register(
-                { splitPageMergeMode = it },
+                { splitPageMergeMode = SplitPageMergeMode.normalize(it) },
                 {
-                    splitPageMergeMode = it
-                    reloadChapterListener?.invoke(doublePages)
+                    splitPageMergeMode = SplitPageMergeMode.normalize(it)
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeThreshold
+            .register(
+                { splitPageMergeThreshold = it },
+                {
+                    splitPageMergeThreshold = it
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeMaxHeightRatio
+            .register(
+                { splitPageMergeMaxHeightRatio = it },
+                {
+                    splitPageMergeMaxHeightRatio = it
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeMinimumEdgeVariance
+            .register(
+                { splitPageMergeMinimumEdgeVariance = it },
+                {
+                    splitPageMergeMinimumEdgeVariance = it
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeContinuityMultiplier
+            .register(
+                { splitPageMergeContinuityMultiplier = it },
+                {
+                    splitPageMergeContinuityMultiplier = it
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeMinimumContinuity
+            .register(
+                { splitPageMergeMinimumContinuity = it },
+                {
+                    splitPageMergeMinimumContinuity = it
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeSampleColumns
+            .register(
+                { splitPageMergeSampleColumns = it },
+                {
+                    splitPageMergeSampleColumns = it
+                    splitPageMergeChangedListener?.invoke()
+                },
+            )
+
+        readerPreferences.splitPageMergeSampleRows
+            .register(
+                { splitPageMergeSampleRows = it },
+                {
+                    splitPageMergeSampleRows = it
+                    splitPageMergeChangedListener?.invoke()
                 },
             )
 
@@ -242,9 +321,62 @@ class PagerConfig(
 
     object SplitPageMergeMode {
         const val NONE = 0
-        const val TWO = 1
-        const val SEVERAL = 2
+        const val SEVERAL = 1
+
+        fun normalize(value: Int) = if (value == NONE) NONE else SEVERAL
     }
+
+    object SplitPageMergeThreshold {
+        const val MIN = 5
+        const val MAX = 100
+        const val DEFAULT = 21
+    }
+
+    object SplitPageMergeMaxHeightRatio {
+        const val MIN = 100
+        const val MAX = 300
+        const val DEFAULT = 175
+    }
+
+    object SplitPageMergeMinimumEdgeVariance {
+        const val MIN = 0
+        const val MAX = 50
+        const val DEFAULT = 8
+    }
+
+    object SplitPageMergeContinuityMultiplier {
+        const val MIN = 100
+        const val MAX = 500
+        const val DEFAULT = 300
+    }
+
+    object SplitPageMergeMinimumContinuity {
+        const val MIN = 0
+        const val MAX = 100
+        const val DEFAULT = 35
+    }
+
+    object SplitPageMergeSampleColumns {
+        const val MIN = 8
+        const val MAX = 128
+        const val DEFAULT = 64
+    }
+
+    object SplitPageMergeSampleRows {
+        const val MIN = 1
+        const val MAX = 16
+        const val DEFAULT = 6
+    }
+
+    internal fun splitPageDetectorConfig() = SplitPageDetector.Config(
+        thresholdPercent = splitPageMergeThreshold,
+        maxCombinedHeightRatioPercent = splitPageMergeMaxHeightRatio,
+        minimumEdgeVarianceTenthsPercent = splitPageMergeMinimumEdgeVariance,
+        continuityMultiplierPercent = splitPageMergeContinuityMultiplier,
+        minimumContinuityTenthsPercent = splitPageMergeMinimumContinuity,
+        sampleColumns = splitPageMergeSampleColumns,
+        sampleRows = splitPageMergeSampleRows,
+    )
 
     fun themeToColor(theme: Int) {
         pageCanvasColor = when (theme) {

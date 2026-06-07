@@ -1,6 +1,7 @@
 package eu.kanade.presentation.reader.settings
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -8,12 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import eu.kanade.domain.manga.model.readerOrientation
 import eu.kanade.domain.manga.model.readingMode
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsScreenModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
@@ -24,6 +29,7 @@ import tachiyomi.presentation.core.components.SliderItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 internal fun ColumnScope.ReadingModePage(screenModel: ReaderSettingsScreenModel) {
@@ -59,12 +65,15 @@ internal fun ColumnScope.ReadingModePage(screenModel: ReaderSettingsScreenModel)
         WebtoonWithGapsViewerSettings(screenModel)
         // SY <--
     } else {
-        PagerViewerSettings(screenModel)
+        PagerViewerSettings(screenModel, viewer as? PagerViewer)
     }
 }
 
 @Composable
-private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenModel) {
+private fun ColumnScope.PagerViewerSettings(
+    screenModel: ReaderSettingsScreenModel,
+    viewer: PagerViewer?,
+) {
     HeadingItem(MR.strings.pager_viewer)
 
     val navigationModePager by screenModel.preferences.navigationModePager.collectAsState()
@@ -178,14 +187,108 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
     SettingsChipRow(SYMR.strings.pref_merge_split_pages) {
         ReaderPreferences.SplitPageMergeModes.mapIndexed { index, it ->
             FilterChip(
-                selected = splitPageMergeMode == index,
+                selected = PagerConfig.SplitPageMergeMode.normalize(splitPageMergeMode) == index,
                 onClick = { screenModel.preferences.splitPageMergeMode.set(index) },
                 label = { Text(stringResource(it)) },
             )
         }
     }
+
+    if (PagerConfig.SplitPageMergeMode.normalize(splitPageMergeMode) != PagerConfig.SplitPageMergeMode.NONE) {
+        val splitPageMergeThreshold by screenModel.preferences.splitPageMergeThreshold.collectAsState()
+        SliderItem(
+            value = splitPageMergeThreshold,
+            valueRange = PagerConfig.SplitPageMergeThreshold.MIN..PagerConfig.SplitPageMergeThreshold.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_threshold),
+            valueString = "$splitPageMergeThreshold%",
+            onChange = screenModel.preferences.splitPageMergeThreshold::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val splitPageMergeMaxHeightRatio by screenModel.preferences.splitPageMergeMaxHeightRatio.collectAsState()
+        SliderItem(
+            value = splitPageMergeMaxHeightRatio,
+            valueRange = PagerConfig.SplitPageMergeMaxHeightRatio.MIN..PagerConfig.SplitPageMergeMaxHeightRatio.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_max_height_ratio),
+            valueString = "%.2f".format(splitPageMergeMaxHeightRatio / 100f),
+            onChange = screenModel.preferences.splitPageMergeMaxHeightRatio::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val splitPageMergeMinimumEdgeVariance by screenModel.preferences.splitPageMergeMinimumEdgeVariance.collectAsState()
+        SliderItem(
+            value = splitPageMergeMinimumEdgeVariance,
+            valueRange = PagerConfig.SplitPageMergeMinimumEdgeVariance.MIN..PagerConfig.SplitPageMergeMinimumEdgeVariance.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_minimum_edge_variance),
+            valueString = "%.1f%%".format(splitPageMergeMinimumEdgeVariance / 10f),
+            onChange = screenModel.preferences.splitPageMergeMinimumEdgeVariance::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val splitPageMergeContinuityMultiplier by screenModel.preferences.splitPageMergeContinuityMultiplier.collectAsState()
+        SliderItem(
+            value = splitPageMergeContinuityMultiplier,
+            valueRange = PagerConfig.SplitPageMergeContinuityMultiplier.MIN..PagerConfig.SplitPageMergeContinuityMultiplier.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_continuity_multiplier),
+            valueString = "%.1fx".format(splitPageMergeContinuityMultiplier / 100f),
+            onChange = screenModel.preferences.splitPageMergeContinuityMultiplier::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val splitPageMergeMinimumContinuity by screenModel.preferences.splitPageMergeMinimumContinuity.collectAsState()
+        SliderItem(
+            value = splitPageMergeMinimumContinuity,
+            valueRange = PagerConfig.SplitPageMergeMinimumContinuity.MIN..PagerConfig.SplitPageMergeMinimumContinuity.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_minimum_continuity),
+            valueString = "%.1f%%".format(splitPageMergeMinimumContinuity / 10f),
+            onChange = screenModel.preferences.splitPageMergeMinimumContinuity::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val splitPageMergeSampleColumns by screenModel.preferences.splitPageMergeSampleColumns.collectAsState()
+        SliderItem(
+            value = splitPageMergeSampleColumns,
+            valueRange = PagerConfig.SplitPageMergeSampleColumns.MIN..PagerConfig.SplitPageMergeSampleColumns.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_sample_columns),
+            onChange = screenModel.preferences.splitPageMergeSampleColumns::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val splitPageMergeSampleRows by screenModel.preferences.splitPageMergeSampleRows.collectAsState()
+        SliderItem(
+            value = splitPageMergeSampleRows,
+            valueRange = PagerConfig.SplitPageMergeSampleRows.MIN..PagerConfig.SplitPageMergeSampleRows.MAX,
+            label = stringResource(SYMR.strings.merge_split_pages_sample_rows),
+            onChange = screenModel.preferences.splitPageMergeSampleRows::set,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+
+        val diagnostics = viewer?.splitPageDiagnostics?.collectAsState()?.value
+        val diagnosticsText = diagnostics?.let {
+            """
+            Decision: ${if (it.merges) "MERGE" else "REJECT"} (${it.reason.name})
+            Samples: ${it.firstWidth}x${it.firstHeight} + ${it.secondWidth}x${it.secondHeight}
+            Combined ratio: ${formatDiagnostic(it.combinedHeightRatio)} <= ${formatDiagnostic(it.maximumCombinedHeightRatio)}
+            Seam difference: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.seamThreshold)}
+            Local edge difference: ${formatDiagnostic(it.localDifference)}
+            Edge variance: ${formatDiagnostic(it.edgeVariance)} >= ${formatDiagnostic(it.minimumEdgeVariance)}
+            Continuity: ${formatDiagnostic(it.seamDifference)} <= ${formatDiagnostic(it.continuityLimit)}
+            Continuity settings: ${formatDiagnostic(it.continuityMultiplier)}x, minimum ${formatDiagnostic(it.minimumContinuity)}
+            Sampling: ${it.sampleColumns} columns x ${it.sampleRows} rows
+            """.trimIndent()
+        } ?: stringResource(SYMR.strings.merge_split_pages_diagnostics_waiting)
+
+        Text(
+            text = "${stringResource(SYMR.strings.merge_split_pages_diagnostics)}\n$diagnosticsText",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+    }
     // SY <--
 }
+
+private fun formatDiagnostic(value: Float?): String =
+    value?.let { String.format(Locale.US, "%.4f", it) } ?: "n/a"
 
 @Composable
 private fun ColumnScope.WebtoonViewerSettings(screenModel: ReaderSettingsScreenModel) {

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.model.SplitPageMergeDiagnostics
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressIndicator
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -275,9 +276,10 @@ class PagerPageHolder(
     }
 
     private suspend fun detectSplitPage(candidate: ReaderPage) {
-        val merges = withIOContext {
-            val firstStream = splitDetectionPage.stream ?: return@withIOContext false
-            val secondStream = candidate.stream ?: return@withIOContext false
+        val detectorConfig = viewer.config.splitPageDetectorConfig()
+        val detection = withIOContext {
+            val firstStream = splitDetectionPage.stream ?: return@withIOContext null
+            val secondStream = candidate.stream ?: return@withIOContext null
             firstStream().buffered(16).use { first ->
                 secondStream().buffered(16).use { second ->
                     val firstSource = Buffer().readFrom(first)
@@ -286,12 +288,16 @@ class PagerPageHolder(
                         ImageUtil.isAnimatedAndSupported(firstSource) ||
                         ImageUtil.isAnimatedAndSupported(secondSource)
                     ) {
-                        return@withIOContext false
+                        return@withIOContext null
                     }
-                    val firstBitmap = decodeImage(firstSource, sampleSize = 8) ?: return@withIOContext false
-                    val secondBitmap = decodeImage(secondSource, sampleSize = 8) ?: return@withIOContext false
+                    val firstBitmap = decodeImage(firstSource, sampleSize = 8) ?: return@withIOContext null
+                    val secondBitmap = decodeImage(secondSource, sampleSize = 8) ?: return@withIOContext null
                     try {
-                        SplitPageDetector.shouldMerge(firstBitmap, secondBitmap)
+                        val diagnostics = SplitPageDetector.analyze(firstBitmap, secondBitmap, detectorConfig)
+                        SplitPageDetection(
+                            diagnostics = diagnostics,
+                            config = detectorConfig,
+                        )
                     } finally {
                         firstBitmap.recycle()
                         secondBitmap.recycle()
@@ -299,8 +305,18 @@ class PagerPageHolder(
                 }
             }
         }
-        viewer.onSplitPageDetection(splitDetectionPage, merges)
+        viewer.onSplitPageDetection(
+            splitDetectionPage,
+            detection?.diagnostics?.merges == true,
+            candidate,
+            detection,
+        )
     }
+
+    internal data class SplitPageDetection(
+        val diagnostics: SplitPageMergeDiagnostics,
+        val config: SplitPageDetector.Config,
+    )
 
     private fun process(page: ReaderPage, imageSource: BufferedSource): BufferedSource {
         if (viewer.config.dualPageRotateToFit) {

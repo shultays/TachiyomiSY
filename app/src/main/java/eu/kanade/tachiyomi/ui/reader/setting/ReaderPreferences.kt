@@ -220,6 +220,27 @@ class ReaderPreferences(
     val splitPageMergeMode: Preference<Int> =
         preferenceStore.getInt("split_page_merge_mode", PagerConfig.SplitPageMergeMode.NONE)
 
+    val splitPageMergeThreshold: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_threshold", PagerConfig.SplitPageMergeThreshold.DEFAULT)
+
+    val splitPageMergeMaxHeightRatio: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_max_height_ratio", PagerConfig.SplitPageMergeMaxHeightRatio.DEFAULT)
+
+    val splitPageMergeMinimumEdgeVariance: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_minimum_edge_variance", PagerConfig.SplitPageMergeMinimumEdgeVariance.DEFAULT)
+
+    val splitPageMergeContinuityMultiplier: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_continuity_multiplier", PagerConfig.SplitPageMergeContinuityMultiplier.DEFAULT)
+
+    val splitPageMergeMinimumContinuity: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_minimum_continuity", PagerConfig.SplitPageMergeMinimumContinuity.DEFAULT)
+
+    val splitPageMergeSampleColumns: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_sample_columns", PagerConfig.SplitPageMergeSampleColumns.DEFAULT)
+
+    val splitPageMergeSampleRows: Preference<Int> =
+        preferenceStore.getInt("split_page_merge_sample_rows", PagerConfig.SplitPageMergeSampleRows.DEFAULT)
+
     val archiveReaderMode: Preference<Int> = preferenceStore.getInt("archive_reader_mode", ArchiveReaderMode.LOAD_FROM_FILE)
     // SY <--
 
@@ -319,7 +340,6 @@ class ReaderPreferences(
 
         val SplitPageMergeModes = listOf(
             SYMR.strings.merge_split_pages_none,
-            SYMR.strings.merge_split_pages_two,
             SYMR.strings.merge_split_pages_several,
         )
 

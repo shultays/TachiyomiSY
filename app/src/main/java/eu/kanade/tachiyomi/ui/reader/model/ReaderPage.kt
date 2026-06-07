@@ -28,4 +28,10 @@ open class ReaderPage(
 
     /** Cached result of checking whether this image continues into the next source page. */
     var splitPageNext: Boolean? = null
+
+    var splitPageWidth: Int? = null
+
+    var splitPageHeight: Int? = null
+
+    var splitPageDiagnostics: SplitPageMergeDiagnostics? = null
 }

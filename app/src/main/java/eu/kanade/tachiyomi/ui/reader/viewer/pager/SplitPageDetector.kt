@@ -4,52 +4,134 @@ import android.graphics.Bitmap
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import eu.kanade.tachiyomi.ui.reader.model.SplitPageMergeDiagnostics
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 
 internal object SplitPageDetector {
 
-    private const val SAMPLE_COLUMNS = 64
-    private const val SAMPLE_ROWS = 6
+    data class Config(
+        val thresholdPercent: Int,
+        val maxCombinedHeightRatioPercent: Int,
+        val minimumEdgeVarianceTenthsPercent: Int,
+        val continuityMultiplierPercent: Int,
+        val minimumContinuityTenthsPercent: Int,
+        val sampleColumns: Int,
+        val sampleRows: Int,
+    )
 
-    fun shouldMerge(upper: Bitmap, lower: Bitmap): Boolean {
-        if (upper.width != lower.width || upper.width < 8 || upper.height < 2 || lower.height < 2) return false
+    fun analyze(upper: Bitmap, lower: Bitmap, config: Config): SplitPageMergeDiagnostics {
+        val maximumCombinedHeightRatio = config.maxCombinedHeightRatioPercent / 100f
+        val seamThreshold = config.thresholdPercent.coerceIn(1, 100) / 100f
+        val minimumEdgeVariance = config.minimumEdgeVarianceTenthsPercent.coerceAtLeast(0) / 1000f
+        val minimumContinuity = config.minimumContinuityTenthsPercent.coerceAtLeast(0) / 1000f
+        val continuityMultiplier = config.continuityMultiplierPercent.coerceAtLeast(0) / 100f
+        val combinedHeightRatio = if (upper.width > 0) {
+            (upper.height + lower.height).toFloat() / upper.width
+        } else {
+            null
+        }
 
-        val upperRatio = upper.height.toFloat() / upper.width
-        val lowerRatio = lower.height.toFloat() / lower.width
-        val bothPageLike = upperRatio in 1.1f..2.0f &&
-            lowerRatio in 1.1f..2.0f &&
-            min(upper.height, lower.height).toFloat() / max(upper.height, lower.height) > 0.8f
+        fun result(
+            merges: Boolean,
+            reason: SplitPageMergeDiagnostics.Reason,
+            seamDifference: Float? = null,
+            localDifference: Float? = null,
+            edgeVariance: Float? = null,
+            continuityLimit: Float? = null,
+        ) = SplitPageMergeDiagnostics(
+            merges = merges,
+            reason = reason,
+            firstWidth = upper.width,
+            firstHeight = upper.height,
+            secondWidth = lower.width,
+            secondHeight = lower.height,
+            combinedHeightRatio = combinedHeightRatio,
+            maximumCombinedHeightRatio = maximumCombinedHeightRatio,
+            seamDifference = seamDifference,
+            seamThreshold = seamThreshold,
+            localDifference = localDifference,
+            edgeVariance = edgeVariance,
+            minimumEdgeVariance = minimumEdgeVariance,
+            continuityLimit = continuityLimit,
+            continuityMultiplier = continuityMultiplier,
+            minimumContinuity = minimumContinuity,
+            sampleColumns = config.sampleColumns,
+            sampleRows = config.sampleRows,
+        )
 
-        val seamDifference = seamDifference(upper, lower)
+        if (upper.width < 2 || upper.height < 2 || lower.height < 2) {
+            return result(false, SplitPageMergeDiagnostics.Reason.INVALID_SIZE)
+        }
+        if (upper.width != lower.width) {
+            return result(false, SplitPageMergeDiagnostics.Reason.WIDTH_MISMATCH)
+        }
+        if (!isCombinedHeightAllowed(upper.width, upper.height + lower.height, config)) {
+            return result(false, SplitPageMergeDiagnostics.Reason.COMBINED_IMAGE_TOO_TALL)
+        }
+
+        val seamDifference = seamDifference(upper, lower, config)
         val localDifference = (
-            internalEdgeDifference(upper, atBottom = true) +
-                internalEdgeDifference(lower, atBottom = false)
+            internalEdgeDifference(upper, atBottom = true, config) +
+                internalEdgeDifference(lower, atBottom = false, config)
             ) / 2f
-        val seamVariance = edgeVariance(upper, lower)
+        val seamVariance = edgeVariance(upper, lower, config)
 
         // Flat white/black borders frequently occur between intentional pages.
-        if (seamVariance < 0.008f) return false
-
-        val shortFragment = min(upperRatio, lowerRatio) < 0.75f
-        val allowedDifference = when {
-            shortFragment -> 0.13f
-            bothPageLike -> 0.045f
-            else -> 0.085f
+        if (seamVariance < minimumEdgeVariance) {
+            return result(
+                false,
+                SplitPageMergeDiagnostics.Reason.EDGE_VARIANCE_TOO_LOW,
+                seamDifference,
+                localDifference,
+                seamVariance,
+            )
         }
-        val continuityLimit = max(0.035f, localDifference * if (shortFragment) 3f else 2f)
-        return seamDifference <= allowedDifference && seamDifference <= continuityLimit
+
+        val continuityLimit = max(minimumContinuity, localDifference * continuityMultiplier)
+        if (seamDifference > seamThreshold) {
+            return result(
+                false,
+                SplitPageMergeDiagnostics.Reason.SEAM_DIFFERENCE_TOO_HIGH,
+                seamDifference,
+                localDifference,
+                seamVariance,
+                continuityLimit,
+            )
+        }
+        if (seamDifference > continuityLimit) {
+            return result(
+                false,
+                SplitPageMergeDiagnostics.Reason.CONTINUITY_TOO_LOW,
+                seamDifference,
+                localDifference,
+                seamVariance,
+                continuityLimit,
+            )
+        }
+        return result(
+            true,
+            SplitPageMergeDiagnostics.Reason.MERGED,
+            seamDifference,
+            localDifference,
+            seamVariance,
+            continuityLimit,
+        )
     }
 
-    private fun seamDifference(upper: Bitmap, lower: Bitmap): Float {
+    fun isCombinedHeightAllowed(width: Int, totalHeight: Int, config: Config): Boolean =
+        width > 0 && totalHeight.toFloat() / width <= config.maxCombinedHeightRatioPercent / 100f
+
+    private fun seamDifference(upper: Bitmap, lower: Bitmap, config: Config): Float {
         var difference = 0L
         var samples = 0
-        repeat(SAMPLE_ROWS) { row ->
-            val upperY = (upper.height - SAMPLE_ROWS + row).coerceIn(0, upper.height - 1)
+        val sampleRows = config.sampleRows.coerceIn(1, minOf(upper.height, lower.height))
+        val sampleColumns = config.sampleColumns.coerceAtLeast(2)
+        repeat(sampleRows) { row ->
+            val upperY = (upper.height - sampleRows + row).coerceIn(0, upper.height - 1)
             val lowerY = row.coerceAtMost(lower.height - 1)
-            repeat(SAMPLE_COLUMNS) { column ->
-                val x = column * (upper.width - 1) / (SAMPLE_COLUMNS - 1)
+            repeat(sampleColumns) { column ->
+                val x = column * (upper.width - 1) / (sampleColumns - 1)
                 difference += colorDifference(upper.getPixel(x, upperY), lower.getPixel(x, lowerY))
                 samples++
             }
@@ -57,18 +139,20 @@ internal object SplitPageDetector {
         return difference.toFloat() / (samples * 255f * 3f)
     }
 
-    private fun internalEdgeDifference(bitmap: Bitmap, atBottom: Boolean): Float {
+    private fun internalEdgeDifference(bitmap: Bitmap, atBottom: Boolean, config: Config): Float {
         var difference = 0L
         var samples = 0
-        repeat(SAMPLE_ROWS) { row ->
+        val sampleRows = config.sampleRows.coerceIn(1, bitmap.height - 1)
+        val sampleColumns = config.sampleColumns.coerceAtLeast(2)
+        repeat(sampleRows) { row ->
             val y = if (atBottom) {
-                (bitmap.height - SAMPLE_ROWS + row).coerceIn(1, bitmap.height - 1)
+                (bitmap.height - sampleRows + row).coerceIn(1, bitmap.height - 1)
             } else {
                 row.coerceIn(0, (bitmap.height - 2).coerceAtLeast(0))
             }
             val adjacentY = if (atBottom) y - 1 else (y + 1).coerceAtMost(bitmap.height - 1)
-            repeat(SAMPLE_COLUMNS) { column ->
-                val x = column * (bitmap.width - 1) / (SAMPLE_COLUMNS - 1)
+            repeat(sampleColumns) { column ->
+                val x = column * (bitmap.width - 1) / (sampleColumns - 1)
                 difference += colorDifference(bitmap.getPixel(x, y), bitmap.getPixel(x, adjacentY))
                 samples++
             }
@@ -76,10 +160,11 @@ internal object SplitPageDetector {
         return difference.toFloat() / (samples * 255f * 3f)
     }
 
-    private fun edgeVariance(upper: Bitmap, lower: Bitmap): Float {
-        val colors = ArrayList<Int>(SAMPLE_COLUMNS * 2)
-        repeat(SAMPLE_COLUMNS) { column ->
-            val x = column * (upper.width - 1) / (SAMPLE_COLUMNS - 1)
+    private fun edgeVariance(upper: Bitmap, lower: Bitmap, config: Config): Float {
+        val sampleColumns = config.sampleColumns.coerceAtLeast(2)
+        val colors = ArrayList<Int>(sampleColumns * 2)
+        repeat(sampleColumns) { column ->
+            val x = column * (upper.width - 1) / (sampleColumns - 1)
             colors += upper.getPixel(x, upper.height - 1)
             colors += lower.getPixel(x, 0)
         }
