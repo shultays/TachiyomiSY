@@ -24,13 +24,14 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         val first: ReaderItem,
         val second: ReaderItem? = null,
         val splitPages: List<ReaderPage> = emptyList(),
+        val secondSplitPages: List<ReaderPage> = emptyList(),
         val splitCandidate: ReaderPage? = null,
     ) {
         fun contains(item: ReaderItem): Boolean =
-            first == item || second == item || splitPages.contains(item)
+            first == item || second == item || splitPages.contains(item) || secondSplitPages.contains(item)
 
         fun pages(): List<ReaderPage> = when {
-            splitPages.isNotEmpty() -> splitPages
+            splitPages.isNotEmpty() || secondSplitPages.isNotEmpty() -> splitPages + secondSplitPages
             else -> listOfNotNull(first as? ReaderPage, second as? ReaderPage)
         }
     }
@@ -172,6 +173,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 item,
                 item2 as? ReaderPage,
                 joinedItem.splitPages,
+                joinedItem.secondSplitPages,
                 joinedItem.splitCandidate,
             )
             is ChapterTransition -> PagerTransitionHolder(readerThemedContext, viewer, item)
@@ -442,36 +444,44 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             val candidate = (subItems.getOrNull(index + pages.size) as? ReaderPage)
                 ?.takeIf { it.chapter.chapter.id == item.chapter.chapter.id && pages.last().splitPageNext == null }
 
-            if (
-                viewer.config.doublePages &&
-                pages.size == 1 &&
-                candidate == null &&
-                item.splitPageNext == false &&
-                !item.fullPage
-            ) {
-                val next = subItems.getOrNull(index + 1) as? ReaderPage
-                val nextCanBePaired = next?.let {
-                    it.chapter.chapter.id == item.chapter.chapter.id &&
-                        (
-                            it.splitPageNext == false ||
-                                subItems.getOrNull(index + 2) !is ReaderPage ||
-                                (subItems[index + 2] as ReaderPage).chapter.chapter.id != item.chapter.chapter.id
-                            ) &&
-                        !it.fullPage
-                } == true
-                if (nextCanBePaired) {
-                    result += JoinedItem(first = item, second = next)
-                    index += 2
-                    continue
-                }
-            }
-
             result += JoinedItem(
                 first = item,
                 splitPages = pages.takeIf { it.size > 1 }.orEmpty(),
                 splitCandidate = candidate,
             )
             index += pages.size
+        }
+        return if (viewer.config.doublePages) pairLogicalPages(result) else result
+    }
+
+    private fun pairLogicalPages(items: List<JoinedItem>): MutableList<JoinedItem> {
+        val result = mutableListOf<JoinedItem>()
+        var index = 0
+        while (index < items.size) {
+            val first = items[index]
+            val second = items.getOrNull(index + 1)
+            val firstPage = first.first as? ReaderPage
+            val secondPage = second?.first as? ReaderPage
+            val canPair = firstPage != null &&
+                secondPage != null &&
+                firstPage.chapter.chapter.id == secondPage.chapter.chapter.id &&
+                first.splitCandidate == null &&
+                second.splitCandidate == null &&
+                !firstPage.fullPage &&
+                !secondPage.fullPage
+
+            if (canPair) {
+                result += JoinedItem(
+                    first = firstPage,
+                    second = secondPage,
+                    splitPages = first.pages(),
+                    secondSplitPages = second.pages(),
+                )
+                index += 2
+            } else {
+                result += first
+                index++
+            }
         }
         return result
     }

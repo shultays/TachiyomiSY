@@ -19,6 +19,8 @@ data class SplitPageStitchDiagnostics(
     val minimumContinuity: Float,
     val sampleColumns: Int,
     val sampleRows: Int,
+    val stripHeightRatio: Float? = null,
+    val maximumStripHeightRatio: Float? = null,
 ) {
     enum class Reason {
         STITCHED,
@@ -28,5 +30,8 @@ data class SplitPageStitchDiagnostics(
         EDGE_VARIANCE_TOO_LOW,
         SEAM_DIFFERENCE_TOO_HIGH,
         CONTINUITY_TOO_LOW,
+        STRIP_TOO_TALL,
+        COMBINED_IMAGE_NOT_PORTRAIT,
+        SHORT_PAGE_APPENDED,
     }
 }

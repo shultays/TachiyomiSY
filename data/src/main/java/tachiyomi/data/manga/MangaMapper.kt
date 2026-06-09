@@ -38,6 +38,17 @@ object MangaMapper {
         @Suppress("UNUSED_PARAMETER")
         isSyncing: Long,
         notes: String,
+        // SY -->
+        stitchSplitPageMode: Long,
+        stitchSplitPageThreshold: Long,
+        stitchSplitPageMaxHeightRatio: Long,
+        stitchSplitPageMinimumEdgeVariance: Long,
+        stitchSplitPageContinuityMultiplier: Long,
+        stitchSplitPageMinimumContinuity: Long,
+        stitchSplitPageSampleColumns: Long,
+        stitchSplitPageSampleRows: Long,
+        stitchSplitPageMaximumStripHeight: Long,
+        // SY <--
     ): Manga = Manga(
         id = id,
         source = source,
@@ -65,6 +76,17 @@ object MangaMapper {
         favoriteModifiedAt = favoriteModifiedAt,
         version = version,
         notes = notes,
+        // SY -->
+        stitchSplitPageMode = stitchSplitPageMode.toInt(),
+        stitchSplitPageThreshold = stitchSplitPageThreshold.toInt(),
+        stitchSplitPageMaxHeightRatio = stitchSplitPageMaxHeightRatio.toInt(),
+        stitchSplitPageMinimumEdgeVariance = stitchSplitPageMinimumEdgeVariance.toInt(),
+        stitchSplitPageContinuityMultiplier = stitchSplitPageContinuityMultiplier.toInt(),
+        stitchSplitPageMinimumContinuity = stitchSplitPageMinimumContinuity.toInt(),
+        stitchSplitPageSampleColumns = stitchSplitPageSampleColumns.toInt(),
+        stitchSplitPageSampleRows = stitchSplitPageSampleRows.toInt(),
+        stitchSplitPageMaximumStripHeight = stitchSplitPageMaximumStripHeight.toInt(),
+        // SY <--
     )
 
     fun mapLibraryManga(
@@ -97,6 +119,17 @@ object MangaMapper {
         version: Long,
         isSyncing: Long,
         notes: String,
+        // SY -->
+        stitchSplitPageMode: Long,
+        stitchSplitPageThreshold: Long,
+        stitchSplitPageMaxHeightRatio: Long,
+        stitchSplitPageMinimumEdgeVariance: Long,
+        stitchSplitPageContinuityMultiplier: Long,
+        stitchSplitPageMinimumContinuity: Long,
+        stitchSplitPageSampleColumns: Long,
+        stitchSplitPageSampleRows: Long,
+        stitchSplitPageMaximumStripHeight: Long,
+        // SY <--
         totalCount: Long,
         readCount: Double,
         latestUpload: Long,
@@ -134,6 +167,17 @@ object MangaMapper {
             version,
             isSyncing,
             notes,
+            // SY -->
+            stitchSplitPageMode,
+            stitchSplitPageThreshold,
+            stitchSplitPageMaxHeightRatio,
+            stitchSplitPageMinimumEdgeVariance,
+            stitchSplitPageContinuityMultiplier,
+            stitchSplitPageMinimumContinuity,
+            stitchSplitPageSampleColumns,
+            stitchSplitPageSampleRows,
+            stitchSplitPageMaximumStripHeight,
+            // SY <--
         ),
         categories = categories.split(",").map { it.toLong() },
         totalChapters = totalCount,
@@ -174,6 +218,17 @@ object MangaMapper {
         version: Long,
         isSyncing: Long,
         notes: String,
+        // SY -->
+        stitchSplitPageMode: Long,
+        stitchSplitPageThreshold: Long,
+        stitchSplitPageMaxHeightRatio: Long,
+        stitchSplitPageMinimumEdgeVariance: Long,
+        stitchSplitPageContinuityMultiplier: Long,
+        stitchSplitPageMinimumContinuity: Long,
+        stitchSplitPageSampleColumns: Long,
+        stitchSplitPageSampleRows: Long,
+        stitchSplitPageMaximumStripHeight: Long,
+        // SY <--
         totalCount: Long,
     ): MangaWithChapterCount = MangaWithChapterCount(
         manga = mapManga(
@@ -205,6 +260,17 @@ object MangaMapper {
             version,
             isSyncing,
             notes,
+            // SY -->
+            stitchSplitPageMode,
+            stitchSplitPageThreshold,
+            stitchSplitPageMaxHeightRatio,
+            stitchSplitPageMinimumEdgeVariance,
+            stitchSplitPageContinuityMultiplier,
+            stitchSplitPageMinimumContinuity,
+            stitchSplitPageSampleColumns,
+            stitchSplitPageSampleRows,
+            stitchSplitPageMaximumStripHeight,
+            // SY <--
         ),
         chapterCount = totalCount,
     )
@@ -236,6 +302,17 @@ object MangaMapper {
                 favoriteModifiedAt = libraryView.favorite_modified_at,
                 version = libraryView.version,
                 notes = libraryView.notes,
+                // SY -->
+                stitchSplitPageMode = libraryView.stitch_split_page_mode.toInt(),
+                stitchSplitPageThreshold = libraryView.stitch_split_page_threshold.toInt(),
+                stitchSplitPageMaxHeightRatio = libraryView.stitch_split_page_max_height_ratio.toInt(),
+                stitchSplitPageMinimumEdgeVariance = libraryView.stitch_split_page_minimum_edge_variance.toInt(),
+                stitchSplitPageContinuityMultiplier = libraryView.stitch_split_page_continuity_multiplier.toInt(),
+                stitchSplitPageMinimumContinuity = libraryView.stitch_split_page_minimum_continuity.toInt(),
+                stitchSplitPageSampleColumns = libraryView.stitch_split_page_sample_columns.toInt(),
+                stitchSplitPageSampleRows = libraryView.stitch_split_page_sample_rows.toInt(),
+                stitchSplitPageMaximumStripHeight = libraryView.stitch_split_page_maximum_strip_height.toInt(),
+                // SY <--
             ),
             categories = libraryView.categories.split(",").map { it.toLong() },
             totalChapters = libraryView.totalCount,

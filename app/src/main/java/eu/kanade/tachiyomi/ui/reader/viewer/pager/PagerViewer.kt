@@ -155,7 +155,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         config.splitPageStitchChangedListener = {
             adapter.rebuildSplitPageStitches()
             _splitPageStitchDiagnostics.value = null
-            refreshAdapter()
+            refreshAdapter(recreateItems = true)
         }
 
         config.imagePropertyChangedListener = {
@@ -406,9 +406,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      * Resets the adapter in order to recreate all the views. Used when a image configuration is
      * changed.
      */
-    private fun refreshAdapter() {
+    private fun refreshAdapter(recreateItems: Boolean = false) {
         val currentItem = pager.currentItem
         adapter.refresh()
+        if (recreateItems) {
+            pager.adapter = null
+        }
         pager.adapter = adapter
         pager.setCurrentItem(currentItem, false)
     }

@@ -37,6 +37,17 @@ data class Manga(
     val favoriteModifiedAt: Long?,
     val version: Long,
     val notes: String,
+    // SY -->
+    val stitchSplitPageMode: Int = 0,
+    val stitchSplitPageThreshold: Int = 21,
+    val stitchSplitPageMaxHeightRatio: Int = 175,
+    val stitchSplitPageMinimumEdgeVariance: Int = 8,
+    val stitchSplitPageContinuityMultiplier: Int = 600,
+    val stitchSplitPageMinimumContinuity: Int = 200,
+    val stitchSplitPageSampleColumns: Int = 64,
+    val stitchSplitPageSampleRows: Int = 6,
+    val stitchSplitPageMaximumStripHeight: Int = 25,
+    // SY <--
 ) : Serializable {
 
     // SY -->

@@ -312,6 +312,7 @@ class ReaderActivity : BaseActivity() {
                 onChangeOrientation = viewModel::setMangaOrientationType,
                 onAddCurrentPageToBlacklist = viewModel::addCurrentPageToBlacklist,
                 onRemoveBlacklistedPage = viewModel::removeBlacklistedPage,
+                onStitchSettingsChanged = viewModel::onStitchSettingsChanged,
             )
         }
 

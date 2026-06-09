@@ -139,6 +139,15 @@ private fun Manga.toBackupManga(/* SY --> */customMangaInfo: CustomMangaInfo?/* 
         version = this.version,
         notes = this.notes,
         initialized = this.initialized,
+        stitchSplitPageMode = this.stitchSplitPageMode,
+        stitchSplitPageThreshold = this.stitchSplitPageThreshold,
+        stitchSplitPageMaxHeightRatio = this.stitchSplitPageMaxHeightRatio,
+        stitchSplitPageMinimumEdgeVariance = this.stitchSplitPageMinimumEdgeVariance,
+        stitchSplitPageContinuityMultiplier = this.stitchSplitPageContinuityMultiplier,
+        stitchSplitPageMinimumContinuity = this.stitchSplitPageMinimumContinuity,
+        stitchSplitPageSampleColumns = this.stitchSplitPageSampleColumns,
+        stitchSplitPageSampleRows = this.stitchSplitPageSampleRows,
+        stitchSplitPageMaximumStripHeight = this.stitchSplitPageMaximumStripHeight,
         // SY -->
     ).also { backupManga ->
         customMangaInfo?.let {
