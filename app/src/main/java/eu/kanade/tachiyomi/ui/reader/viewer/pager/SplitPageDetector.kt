@@ -159,8 +159,14 @@ internal object SplitPageDetector {
             firstHeight >= 2 &&
             secondHeight >= 2 &&
             firstWidth == secondWidth &&
-            secondHeight.toFloat() / firstHeight <= config.maximumStripHeightPercent / 100f &&
+            isShortPageHeightAllowed(firstHeight, secondHeight, config) &&
             isCombinedPageShapeAllowed(firstWidth, firstHeight + secondHeight, config)
+    }
+
+    fun isShortPageHeightAllowed(firstHeight: Int, nextHeight: Int, config: Config): Boolean {
+        return firstHeight >= 2 &&
+            nextHeight >= 2 &&
+            nextHeight.toFloat() / firstHeight <= config.maximumStripHeightPercent / 100f
     }
 
     fun isCombinedPageShapeAllowed(width: Int, totalHeight: Int, config: Config): Boolean {

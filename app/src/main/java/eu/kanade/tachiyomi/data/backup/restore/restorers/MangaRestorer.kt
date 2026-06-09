@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.backup.restore.restorers
 
+import android.app.Application
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
@@ -8,6 +9,7 @@ import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergedMangaReference
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
+import eu.kanade.tachiyomi.ui.reader.blacklist.BlacklistedPageStore
 import exh.EXHMigrations
 import tachiyomi.data.DatabaseHandler
 import tachiyomi.data.UpdateStrategyColumnAdapter
@@ -47,6 +49,7 @@ class MangaRestorer(
     private val setCustomMangaInfo: SetCustomMangaInfo = Injekt.get(),
     private val insertFlatMetadata: InsertFlatMetadata = Injekt.get(),
     private val getFlatMetadataById: GetFlatMetadataById = Injekt.get(),
+    private val blacklistedPageStore: BlacklistedPageStore = BlacklistedPageStore(Injekt.get<Application>()),
     // SY <--
 ) {
     private var now = ZonedDateTime.now()
@@ -98,6 +101,7 @@ class MangaRestorer(
                 customManga = backupManga.getCustomMangaInfo(),
                 // SY <--
             )
+            blacklistedPageStore.restore(restoredManga.id, backupManga.blacklistedPages)
 
             if (isSync) {
                 mangasQueries.resetIsSyncing()
@@ -144,6 +148,7 @@ class MangaRestorer(
             stitchSplitPageSampleColumns = newer.stitchSplitPageSampleColumns,
             stitchSplitPageSampleRows = newer.stitchSplitPageSampleRows,
             stitchSplitPageMaximumStripHeight = newer.stitchSplitPageMaximumStripHeight,
+            stitchSplitPageMaximumStitchCount = newer.stitchSplitPageMaximumStitchCount,
         )
     }
 
@@ -184,6 +189,7 @@ class MangaRestorer(
                 stitchSplitPageSampleColumns = manga.stitchSplitPageSampleColumns.toLong(),
                 stitchSplitPageSampleRows = manga.stitchSplitPageSampleRows.toLong(),
                 stitchSplitPageMaximumStripHeight = manga.stitchSplitPageMaximumStripHeight.toLong(),
+                stitchSplitPageMaximumStitchCount = manga.stitchSplitPageMaximumStitchCount.toLong(),
             )
         }
         return manga

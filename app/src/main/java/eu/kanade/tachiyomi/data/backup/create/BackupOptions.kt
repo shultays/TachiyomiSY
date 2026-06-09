@@ -19,6 +19,7 @@ data class BackupOptions(
     // SY -->
     val customInfo: Boolean = true,
     val savedSearches: Boolean = true,
+    val blacklistedPages: Boolean = true,
     // SY <--
 ) {
 
@@ -36,6 +37,7 @@ data class BackupOptions(
         // SY -->
         customInfo,
         savedSearches,
+        blacklistedPages,
         // SY <--
     )
 
@@ -90,6 +92,12 @@ data class BackupOptions(
                 getter = BackupOptions::savedSearches,
                 setter = { options, enabled -> options.copy(savedSearches = enabled) },
             ),
+            Entry(
+                label = MR.strings.blacklisted_pages,
+                getter = BackupOptions::blacklistedPages,
+                setter = { options, enabled -> options.copy(blacklistedPages = enabled) },
+                enabled = { it.libraryEntries },
+            ),
             // SY <--
         )
 
@@ -131,6 +139,7 @@ data class BackupOptions(
             // SY -->
             customInfo = array[10],
             savedSearches = array[11],
+            blacklistedPages = array.getOrElse(12) { true },
             // SY <--
         )
     }

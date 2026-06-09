@@ -95,6 +95,8 @@ class PagerConfig(
 
     var splitPageStitchMaximumStripHeight = SplitPageStitchMaximumStripHeight.DEFAULT
 
+    var splitPageStitchMaximumStitchCount = SplitPageStitchMaximumStitchCount.DEFAULT
+
     // SY <--
 
     init {
@@ -301,8 +303,14 @@ class PagerConfig(
 
     object SplitPageStitchMaximumStripHeight {
         const val MIN = 5
-        const val MAX = 50
+        const val MAX = 100
         const val DEFAULT = 25
+    }
+
+    object SplitPageStitchMaximumStitchCount {
+        const val MIN = 2
+        const val MAX = 10
+        const val DEFAULT = 2
     }
 
     // SY -->
@@ -319,6 +327,7 @@ class PagerConfig(
         splitPageStitchSampleColumns = manga.stitchSplitPageSampleColumns
         splitPageStitchSampleRows = manga.stitchSplitPageSampleRows
         splitPageStitchMaximumStripHeight = manga.stitchSplitPageMaximumStripHeight
+        splitPageStitchMaximumStitchCount = manga.stitchSplitPageMaximumStitchCount
         if (notifyChanged) {
             splitPageStitchChangedListener?.invoke()
         }

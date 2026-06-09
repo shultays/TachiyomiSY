@@ -277,7 +277,18 @@ private fun ColumnScope.PagerViewerSettings(
                 onChange = screenModel::setStitchSplitPageMaximumStripHeight,
                 pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             )
+
         }
+
+        val maximumStitchCount = manga?.stitchSplitPageMaximumStitchCount
+            ?: PagerConfig.SplitPageStitchMaximumStitchCount.DEFAULT
+        SliderItem(
+            value = maximumStitchCount,
+            valueRange = PagerConfig.SplitPageStitchMaximumStitchCount.MIN..PagerConfig.SplitPageStitchMaximumStitchCount.MAX,
+            label = stringResource(SYMR.strings.stitch_split_pages_maximum_stitch_count),
+            onChange = screenModel::setStitchSplitPageMaximumStitchCount,
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
 
         val diagnostics = viewer?.splitPageStitchDiagnostics?.collectAsState()?.value
         val diagnosticsText = diagnostics?.let {

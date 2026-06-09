@@ -47,6 +47,7 @@ data class Manga(
     val stitchSplitPageSampleColumns: Int = 64,
     val stitchSplitPageSampleRows: Int = 6,
     val stitchSplitPageMaximumStripHeight: Int = 25,
+    val stitchSplitPageMaximumStitchCount: Int = 2,
     // SY <--
 ) : Serializable {
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">TachiyomiSY</string>
+    <string name="app_name" translatable="false">TachiyomiSY-EN</string>
 
     <string name="blacklisted_pages">Blacklisted pages</string>
     <string name="blacklist_current_page">Blacklist current page</string>

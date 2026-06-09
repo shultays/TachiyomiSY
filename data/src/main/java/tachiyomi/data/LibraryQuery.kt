@@ -44,13 +44,14 @@ private val mapper = { cursor: SqlCursor ->
         stitch_split_page_sample_columns = cursor.getLong(32)!!,
         stitch_split_page_sample_rows = cursor.getLong(33)!!,
         stitch_split_page_maximum_strip_height = cursor.getLong(34)!!,
-        totalCount = cursor.getLong(35)!!,
-        readCount = cursor.getDouble(36)!!,
-        latestUpload = cursor.getLong(37)!!,
-        chapterFetchedAt = cursor.getLong(38)!!,
-        lastRead = cursor.getLong(39)!!,
-        bookmarkCount = cursor.getDouble(40)!!,
-        categories = cursor.getString(41)!!,
+        stitch_split_page_maximum_stitch_count = cursor.getLong(35)!!,
+        totalCount = cursor.getLong(36)!!,
+        readCount = cursor.getDouble(37)!!,
+        latestUpload = cursor.getLong(38)!!,
+        chapterFetchedAt = cursor.getLong(39)!!,
+        lastRead = cursor.getLong(40)!!,
+        bookmarkCount = cursor.getDouble(41)!!,
+        categories = cursor.getString(42)!!,
     )
 }
 

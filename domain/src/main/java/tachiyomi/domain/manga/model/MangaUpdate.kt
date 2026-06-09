@@ -36,6 +36,7 @@ data class MangaUpdate(
     val stitchSplitPageSampleColumns: Int? = null,
     val stitchSplitPageSampleRows: Int? = null,
     val stitchSplitPageMaximumStripHeight: Int? = null,
+    val stitchSplitPageMaximumStitchCount: Int? = null,
     // SY <--
 )
 
@@ -69,6 +70,7 @@ fun Manga.toMangaUpdate(): MangaUpdate {
         stitchSplitPageSampleColumns = stitchSplitPageSampleColumns,
         stitchSplitPageSampleRows = stitchSplitPageSampleRows,
         stitchSplitPageMaximumStripHeight = stitchSplitPageMaximumStripHeight,
+        stitchSplitPageMaximumStitchCount = stitchSplitPageMaximumStitchCount,
         // SY <--
         updateStrategy = updateStrategy,
         initialized = initialized,

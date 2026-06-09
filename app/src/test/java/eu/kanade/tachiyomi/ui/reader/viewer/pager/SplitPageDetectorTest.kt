@@ -45,6 +45,33 @@ class SplitPageDetectorTest {
     }
 
     @Test
+    fun `accepts a following page up to the full first page height at one hundred percent`() {
+        assertTrue(
+            SplitPageDetector.shouldAppendShortPage(
+                firstWidth = 1000,
+                firstHeight = 900,
+                secondWidth = 1000,
+                secondHeight = 900,
+                config = config.copy(
+                    maximumStripHeightPercent = 100,
+                    maxCombinedHeightRatioPercent = 180,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `allows additional strips relative to the original page height`() {
+        assertTrue(
+            SplitPageDetector.isShortPageHeightAllowed(
+                firstHeight = 1400,
+                nextHeight = 300,
+                config = config,
+            ),
+        )
+    }
+
+    @Test
     fun `rejects different image widths`() {
         assertFalse(
             SplitPageDetector.shouldAppendShortPage(

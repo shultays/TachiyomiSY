@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.blacklist
 
 import android.content.Context
 import android.graphics.Bitmap
+import eu.kanade.tachiyomi.data.backup.models.BackupBlacklistedPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import tachiyomi.decoder.ImageDecoder
 import java.io.File
@@ -52,6 +53,38 @@ class BlacklistedPageStore(context: Context) {
         val entries = get(mangaId)
         entries.firstOrNull { it.id == id }?.thumbnail?.delete()
         write(mangaId, entries.filterNot { it.id == id })
+    }
+
+    fun backup(mangaId: Long): List<BackupBlacklistedPage> {
+        return get(mangaId).mapNotNull { entry ->
+            runCatching {
+                BackupBlacklistedPage(
+                    id = entry.id,
+                    hash = entry.hash,
+                    thumbnail = entry.thumbnail.readBytes(),
+                    createdAt = entry.createdAt,
+                )
+            }.getOrNull()
+        }
+    }
+
+    fun restore(mangaId: Long, backupEntries: List<BackupBlacklistedPage>) {
+        if (backupEntries.isEmpty()) return
+
+        val existing = get(mangaId).toMutableList()
+        val directory = File(root, mangaId.toString()).apply { mkdirs() }
+        backupEntries.forEach { backup ->
+            if (backup.thumbnail.isEmpty() || existing.any { PerceptualHash.matches(backup.hash, it.hash) }) return@forEach
+
+            val id = backup.id.takeUnless { candidate -> existing.any { it.id == candidate } }
+                ?: UUID.randomUUID().toString()
+            val thumbnail = File(directory, "$id.jpg")
+            runCatching {
+                thumbnail.writeBytes(backup.thumbnail)
+                existing += BlacklistedPage(id, backup.hash, thumbnail, backup.createdAt)
+            }
+        }
+        write(mangaId, existing)
     }
 
     fun hash(page: ReaderPage): ByteArray? {

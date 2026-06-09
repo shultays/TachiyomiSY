@@ -97,6 +97,9 @@ android {
             dimension = "default"
         }
         create("dev") {
+            applicationIdSuffix = ".en"
+            versionCode = 79
+            versionNameSuffix = "-en.3"
             dimension = "default"
         }
     }

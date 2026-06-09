@@ -95,6 +95,7 @@ class SyncManager(
             customInfo = syncOptions.customInfo,
             readEntries = syncOptions.readEntries,
             savedSearches = syncOptions.savedSearches,
+            blacklistedPages = syncOptions.blacklistedPages,
             // SY <--
         )
 

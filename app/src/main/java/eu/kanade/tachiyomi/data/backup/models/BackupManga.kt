@@ -58,6 +58,8 @@ data class BackupManga(
     @ProtoNumber(610) var stitchSplitPageSampleColumns: Int = 64,
     @ProtoNumber(611) var stitchSplitPageSampleRows: Int = 6,
     @ProtoNumber(612) var stitchSplitPageMaximumStripHeight: Int = 25,
+    @ProtoNumber(613) var blacklistedPages: List<BackupBlacklistedPage> = emptyList(),
+    @ProtoNumber(614) var stitchSplitPageMaximumStitchCount: Int = 2,
 
     // J2K specific values
     @ProtoNumber(800) var customTitle: String? = null,
@@ -100,6 +102,7 @@ data class BackupManga(
             stitchSplitPageSampleColumns = this@BackupManga.stitchSplitPageSampleColumns,
             stitchSplitPageSampleRows = this@BackupManga.stitchSplitPageSampleRows,
             stitchSplitPageMaximumStripHeight = this@BackupManga.stitchSplitPageMaximumStripHeight,
+            stitchSplitPageMaximumStitchCount = this@BackupManga.stitchSplitPageMaximumStitchCount,
         )
     }
 }

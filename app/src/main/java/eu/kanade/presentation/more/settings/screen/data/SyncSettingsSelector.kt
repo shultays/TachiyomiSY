@@ -122,6 +122,7 @@ private class SyncSettingsSelectorModel(
                 customInfo = syncSettings.customInfo,
                 readEntries = syncSettings.readEntries,
                 savedSearches = syncSettings.savedSearches,
+                blacklistedPages = syncSettings.blacklistedPages,
                 // SY <--
             )
         }
@@ -142,6 +143,7 @@ private class SyncSettingsSelectorModel(
                 customInfo = backupOptions.customInfo,
                 readEntries = backupOptions.readEntries,
                 savedSearches = backupOptions.savedSearches,
+                blacklistedPages = backupOptions.blacklistedPages,
                 // SY <--
             )
         }

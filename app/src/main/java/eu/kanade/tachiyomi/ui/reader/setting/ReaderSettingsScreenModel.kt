@@ -121,5 +121,14 @@ class ReaderSettingsScreenModel(
             }
         }
     }
+
+    fun setStitchSplitPageMaximumStitchCount(maximumCount: Int) {
+        val manga = mangaFlow.value ?: return
+        ioCoroutineScope.launch {
+            if (setMangaStitchSettings.setStitchSplitPageMaximumStitchCount(manga, maximumCount)) {
+                onStitchSettingsChanged(manga.copy(stitchSplitPageMaximumStitchCount = maximumCount))
+            }
+        }
+    }
     // SY <--
 }

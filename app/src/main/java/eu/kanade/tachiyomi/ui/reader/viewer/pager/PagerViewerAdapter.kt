@@ -421,13 +421,24 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             }
 
             val pages = mutableListOf(item)
-            while (true) {
+            while (pages.size < viewer.config.splitPageStitchMaximumStitchCount) {
                 val next = subItems.getOrNull(index + pages.size) as? ReaderPage ?: break
-                if (next.chapter.chapter.id != item.chapter.chapter.id || pages.last().splitPageNext != true) break
+                if (next.chapter.chapter.id != item.chapter.chapter.id) break
                 val width = pages.first().splitPageWidth ?: break
                 val groupedPages = pages + next
                 val heights = groupedPages.map { it.splitPageHeight }
+                val continuesShortPageGroup =
+                    viewer.config.splitPageStitchMode == PagerConfig.SplitPageStitchMode.APPEND_SHORT_PAGES &&
+                        pages.size > 1 &&
+                        next.splitPageHeight?.let { nextHeight ->
+                            SplitPageDetector.isShortPageHeightAllowed(
+                                firstHeight = heights.first() ?: return@let false,
+                                nextHeight = nextHeight,
+                                config = viewer.config.splitPageDetectorConfig(),
+                            )
+                        } == true
                 if (
+                    (pages.last().splitPageNext != true && !continuesShortPageGroup) ||
                     groupedPages.any { it.splitPageWidth != width } ||
                     heights.any { it == null } ||
                     !SplitPageDetector.isCombinedHeightAllowed(

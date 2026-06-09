@@ -48,6 +48,7 @@ object MangaMapper {
         stitchSplitPageSampleColumns: Long,
         stitchSplitPageSampleRows: Long,
         stitchSplitPageMaximumStripHeight: Long,
+        stitchSplitPageMaximumStitchCount: Long,
         // SY <--
     ): Manga = Manga(
         id = id,
@@ -86,6 +87,7 @@ object MangaMapper {
         stitchSplitPageSampleColumns = stitchSplitPageSampleColumns.toInt(),
         stitchSplitPageSampleRows = stitchSplitPageSampleRows.toInt(),
         stitchSplitPageMaximumStripHeight = stitchSplitPageMaximumStripHeight.toInt(),
+        stitchSplitPageMaximumStitchCount = stitchSplitPageMaximumStitchCount.toInt(),
         // SY <--
     )
 
@@ -129,6 +131,7 @@ object MangaMapper {
         stitchSplitPageSampleColumns: Long,
         stitchSplitPageSampleRows: Long,
         stitchSplitPageMaximumStripHeight: Long,
+        stitchSplitPageMaximumStitchCount: Long,
         // SY <--
         totalCount: Long,
         readCount: Double,
@@ -177,6 +180,7 @@ object MangaMapper {
             stitchSplitPageSampleColumns,
             stitchSplitPageSampleRows,
             stitchSplitPageMaximumStripHeight,
+            stitchSplitPageMaximumStitchCount,
             // SY <--
         ),
         categories = categories.split(",").map { it.toLong() },
@@ -228,6 +232,7 @@ object MangaMapper {
         stitchSplitPageSampleColumns: Long,
         stitchSplitPageSampleRows: Long,
         stitchSplitPageMaximumStripHeight: Long,
+        stitchSplitPageMaximumStitchCount: Long,
         // SY <--
         totalCount: Long,
     ): MangaWithChapterCount = MangaWithChapterCount(
@@ -270,6 +275,7 @@ object MangaMapper {
             stitchSplitPageSampleColumns,
             stitchSplitPageSampleRows,
             stitchSplitPageMaximumStripHeight,
+            stitchSplitPageMaximumStitchCount,
             // SY <--
         ),
         chapterCount = totalCount,
@@ -312,6 +318,7 @@ object MangaMapper {
                 stitchSplitPageSampleColumns = libraryView.stitch_split_page_sample_columns.toInt(),
                 stitchSplitPageSampleRows = libraryView.stitch_split_page_sample_rows.toInt(),
                 stitchSplitPageMaximumStripHeight = libraryView.stitch_split_page_maximum_strip_height.toInt(),
+                stitchSplitPageMaximumStitchCount = libraryView.stitch_split_page_maximum_stitch_count.toInt(),
                 // SY <--
             ),
             categories = libraryView.categories.split(",").map { it.toLong() },

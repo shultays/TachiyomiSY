@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.backup.create.creators
 
+import android.app.Application
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupFlatMetadata
@@ -10,6 +11,7 @@ import eu.kanade.tachiyomi.data.backup.models.backupMergedMangaReferenceMapper
 import eu.kanade.tachiyomi.data.backup.models.backupTrackMapper
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
+import eu.kanade.tachiyomi.ui.reader.blacklist.BlacklistedPageStore
 import exh.source.MERGED_SOURCE_ID
 import exh.source.getMainSource
 import tachiyomi.data.DatabaseHandler
@@ -31,6 +33,7 @@ class MangaBackupCreator(
     private val sourceManager: SourceManager = Injekt.get(),
     private val getCustomMangaInfo: GetCustomMangaInfo = Injekt.get(),
     private val getFlatMetadataById: GetFlatMetadataById = Injekt.get(),
+    private val blacklistedPageStore: BlacklistedPageStore = BlacklistedPageStore(Injekt.get<Application>()),
     // SY <--
 ) {
 
@@ -111,6 +114,10 @@ class MangaBackupCreator(
             }
         }
 
+        if (options.blacklistedPages) {
+            mangaObject.blacklistedPages = blacklistedPageStore.backup(manga.id)
+        }
+
         return mangaObject
     }
 }
@@ -148,6 +155,7 @@ private fun Manga.toBackupManga(/* SY --> */customMangaInfo: CustomMangaInfo?/* 
         stitchSplitPageSampleColumns = this.stitchSplitPageSampleColumns,
         stitchSplitPageSampleRows = this.stitchSplitPageSampleRows,
         stitchSplitPageMaximumStripHeight = this.stitchSplitPageMaximumStripHeight,
+        stitchSplitPageMaximumStitchCount = this.stitchSplitPageMaximumStitchCount,
         // SY -->
     ).also { backupManga ->
         customMangaInfo?.let {

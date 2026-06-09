@@ -88,6 +88,15 @@ class SetMangaStitchSettings(
         )
     }
 
+    suspend fun setStitchSplitPageMaximumStitchCount(manga: Manga, maximumCount: Int): Boolean {
+        return mangaRepository.update(
+            MangaUpdate(
+                id = manga.id,
+                stitchSplitPageMaximumStitchCount = maximumCount,
+            ),
+        )
+    }
+
     suspend fun setAllStitchSettings(
         manga: Manga,
         mode: Int? = null,
@@ -99,6 +108,7 @@ class SetMangaStitchSettings(
         sampleColumns: Int? = null,
         sampleRows: Int? = null,
         maximumStripHeight: Int? = null,
+        maximumStitchCount: Int? = null,
     ): Boolean {
         return mangaRepository.update(
             MangaUpdate(
@@ -112,6 +122,7 @@ class SetMangaStitchSettings(
                 stitchSplitPageSampleColumns = sampleColumns,
                 stitchSplitPageSampleRows = sampleRows,
                 stitchSplitPageMaximumStripHeight = maximumStripHeight,
+                stitchSplitPageMaximumStitchCount = maximumStitchCount,
             ),
         )
     }

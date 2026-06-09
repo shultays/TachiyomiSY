@@ -386,6 +386,7 @@
     <string name="stitch_split_pages_edge_matching">Edge matching</string>
     <string name="stitch_split_pages_append_short">Append short pages</string>
     <string name="stitch_split_pages_maximum_strip_height">Maximum short page height</string>
+    <string name="stitch_split_pages_maximum_stitch_count">Maximum images to stitch</string>
     <string name="stitch_split_pages_threshold">Stitch threshold (higher stitches more)</string>
     <string name="stitch_split_pages_max_height_ratio">Maximum combined height ratio</string>
     <string name="stitch_split_pages_minimum_edge_variance">Minimum edge variance</string>
