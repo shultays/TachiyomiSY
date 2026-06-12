@@ -212,12 +212,10 @@ class PagerPageHolder(
         }
 
         try {
-            val blacklistedPage = displayedPages.firstOrNull { page ->
-                viewer.activity.viewModel.isPageBlacklisted(page)
-            }
-            if (blacklistedPage != null) {
-                blacklistedPage.isBlacklisted = true
-                withUIContext { viewer.onPageBlacklisted(blacklistedPage) }
+            val blacklistedPages = viewer.activity.viewModel.findBlacklistedPages(firstPages)
+                ?: viewer.activity.viewModel.findBlacklistedPages(secondPages)
+            if (blacklistedPages != null) {
+                withUIContext { viewer.onPagesBlacklisted(blacklistedPages) }
                 return
             }
             val (source, isAnimated, background) = withIOContext {

@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.reader.blacklist
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import eu.kanade.tachiyomi.data.backup.models.BackupBlacklistedPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import tachiyomi.decoder.ImageDecoder
@@ -22,7 +24,11 @@ class BlacklistedPageStore(context: Context) {
     }
 
     fun add(mangaId: Long, page: ReaderPage): BlacklistedPage? {
-        val bitmap = decodePage(page) ?: return null
+        return add(mangaId, listOf(page))
+    }
+
+    fun add(mangaId: Long, pages: List<ReaderPage>): BlacklistedPage? {
+        val bitmap = decodePages(pages) ?: return null
         return try {
             val hash = PerceptualHash.calculate(bitmap)
             val existing = get(mangaId)
@@ -98,9 +104,23 @@ class BlacklistedPageStore(context: Context) {
     }
 
     fun matches(page: ReaderPage, entries: List<BlacklistedPage>): Boolean {
+        return matches(listOf(page), entries)
+    }
+
+    fun matches(pages: List<ReaderPage>, entries: List<BlacklistedPage>): Boolean {
         if (entries.isEmpty()) return false
-        val hash = hash(page) ?: return false
+        val hash = if (pages.size == 1) hash(pages.single()) else hash(pages)
+        if (hash == null) return false
         return entries.any { PerceptualHash.matches(hash, it.hash) }
+    }
+
+    private fun hash(pages: List<ReaderPage>): ByteArray? {
+        val bitmap = decodePages(pages) ?: return null
+        return try {
+            PerceptualHash.calculate(bitmap)
+        } finally {
+            bitmap.recycle()
+        }
     }
 
     private fun decodePage(page: ReaderPage): Bitmap? {
@@ -108,6 +128,31 @@ class BlacklistedPageStore(context: Context) {
         return runCatching {
             stream().use { ImageDecoder.newInstance(it)?.decode(sampleSize = 8) }
         }.getOrNull()
+    }
+
+    private fun decodePages(pages: List<ReaderPage>): Bitmap? {
+        if (pages.isEmpty()) return null
+        if (pages.size == 1) return decodePage(pages.single())
+
+        val bitmaps = mutableListOf<Bitmap>()
+        return try {
+            pages.forEach { page ->
+                bitmaps += decodePage(page) ?: return null
+            }
+            val width = bitmaps.maxOf { it.width }
+            val result = Bitmap.createBitmap(width, bitmaps.sumOf { it.height }, Bitmap.Config.ARGB_8888)
+            Canvas(result).apply {
+                drawColor(Color.WHITE)
+                var top = 0f
+                bitmaps.forEach { bitmap ->
+                    drawBitmap(bitmap, (width - bitmap.width) / 2f, top, null)
+                    top += bitmap.height
+                }
+            }
+            result
+        } finally {
+            bitmaps.forEach(Bitmap::recycle)
+        }
     }
 
     private fun createThumbnail(bitmap: Bitmap): Bitmap {

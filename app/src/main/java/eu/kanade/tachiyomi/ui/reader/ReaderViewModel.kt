@@ -1069,22 +1069,22 @@ class ReaderViewModel @JvmOverloads constructor(
 
     fun addCurrentPageToBlacklist() {
         val manga = manga ?: return
-        val page = when (val viewer = state.value.viewer) {
-            is PagerViewer -> viewer.currentPage as? ReaderPage
+        val pages = when (val viewer = state.value.viewer) {
+            is PagerViewer -> viewer.currentBlacklistPages()
             is eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer ->
-                viewer.currentPage as? ReaderPage
-            else -> null
-        } ?: return
+                listOfNotNull(viewer.currentPage as? ReaderPage)
+            else -> emptyList()
+        }
+        if (pages.isEmpty()) return
 
         viewModelScope.launchIO {
-            blacklistedPageStore.add(manga.id, page) ?: return@launchIO
-            page.isBlacklisted = true
+            blacklistedPageStore.add(manga.id, pages) ?: return@launchIO
             mutableState.update { it.copy(blacklistedPages = blacklistedPageStore.get(manga.id)) }
             withUIContext {
                 when (val viewer = state.value.viewer) {
-                    is PagerViewer -> viewer.onPageBlacklisted(page)
+                    is PagerViewer -> viewer.onPagesBlacklisted(pages)
                     is eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer ->
-                        viewer.onPageBlacklisted(page)
+                        pages.singleOrNull()?.let(viewer::onPageBlacklisted)
                 }
             }
         }
@@ -1103,6 +1103,17 @@ class ReaderViewModel @JvmOverloads constructor(
         return withIOContext {
             val entries = state.value.blacklistedPages.ifEmpty { blacklistedPageStore.get(manga.id) }
             blacklistedPageStore.matches(page, entries)
+        }
+    }
+
+    suspend fun findBlacklistedPages(pages: List<ReaderPage>): List<ReaderPage>? {
+        val manga = manga ?: return null
+        return withIOContext {
+            val entries = state.value.blacklistedPages.ifEmpty { blacklistedPageStore.get(manga.id) }
+            when {
+                pages.size > 1 && blacklistedPageStore.matches(pages, entries) -> pages
+                else -> pages.firstOrNull { blacklistedPageStore.matches(it, entries) }?.let(::listOf)
+            }
         }
     }
 

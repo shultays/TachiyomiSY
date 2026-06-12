@@ -240,8 +240,14 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     }
 
     fun blacklistPage(page: ReaderPage) {
-        page.isBlacklisted = true
-        subItems.removeAll { it == page || (it is InsertPage && it.parent == page) }
+        blacklistPages(listOf(page))
+    }
+
+    fun blacklistPages(pages: List<ReaderPage>) {
+        pages.forEach { it.isBlacklisted = true }
+        subItems.removeAll { item ->
+            item in pages || (item is InsertPage && item.parent in pages)
+        }
         setJoinedItems()
     }
 

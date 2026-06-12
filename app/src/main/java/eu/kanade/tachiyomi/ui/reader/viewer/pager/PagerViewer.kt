@@ -487,9 +487,18 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     }
 
     fun onPageBlacklisted(page: ReaderPage) {
+        onPagesBlacklisted(listOf(page))
+    }
+
+    fun onPagesBlacklisted(pages: List<ReaderPage>) {
         currentPage = null
-        adapter.blacklistPage(page)
+        adapter.blacklistPages(pages)
         onPageChange(pager.currentItem.coerceAtMost(adapter.joinedItems.lastIndex).coerceAtLeast(0))
+    }
+
+    fun currentBlacklistPages(): List<ReaderPage> {
+        val item = adapter.joinedItems.getOrNull(pager.currentItem) ?: return emptyList()
+        return item.splitPages.ifEmpty { listOfNotNull(item.first as? ReaderPage) }
     }
 
     private fun cleanupPageSplit() {
