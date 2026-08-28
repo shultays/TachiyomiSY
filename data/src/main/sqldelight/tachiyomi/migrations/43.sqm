@@ -1,8 +1,5 @@
 import kotlin.Boolean;
 
-DROP TRIGGER IF EXISTS update_last_modified_at_mangas_categories;
-ALTER TABLE mangas_categories DROP COLUMN last_modified_at;
-
 DROP TRIGGER IF EXISTS system_category_delete_trigger;
 CREATE TRIGGER system_category_delete_trigger BEFORE DELETE
 ON categories
