@@ -250,7 +250,15 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     private fun onReaderPageSelected(page: ReaderPage, allowPreload: Boolean, forward: Boolean, pageCount: Int) {
         val pages = page.chapter.pages ?: return
         logcat { "onReaderPageSelected: ${page.number}/${pages.size}" }
-        activity.onPageSelected(page, pageCount)
+        activity.onPageSelected(
+            page = page,
+            pageCount = pageCount,
+            viewedPageLastIndex = adapter.joinedItems
+                .getOrNull(pager.currentItem)
+                ?.pages()
+                ?.maxOfOrNull { it.index }
+                ?: page.index,
+        )
 
         // Notify holder of page change
         getPageHolder(page)?.onPageSelected(forward)
@@ -339,6 +347,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                 activity.onPageSelected(
                     joinedItem?.first as? ReaderPage ?: page,
                     joinedItem?.pages()?.size ?: 1,
+                    joinedItem?.pages()?.maxOfOrNull { it.index } ?: page.index,
                 )
             }
         } else {

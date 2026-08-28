@@ -600,7 +600,7 @@ class ReaderViewModel @JvmOverloads constructor(
      * read, update tracking services, enqueue downloaded chapter deletion, and updating the active chapter if this
      * [page]'s chapter is different from the currently active.
      */
-    fun onPageSelected(page: ReaderPage, currentPageText: String /* SY --> */, pageCount: Int /* SY <-- */) {
+    fun onPageSelected(page: ReaderPage, currentPageText: String /* SY --> */, viewedPageLastIndex: Int /* SY <-- */) {
         // InsertPage doesn't change page progress
         if (page is InsertPage) {
             return
@@ -615,7 +615,7 @@ class ReaderViewModel @JvmOverloads constructor(
 
         // Save last page read and mark as read if needed
         viewModelScope.launchNonCancellable {
-            updateChapterProgress(selectedChapter, page/* SY --> */, pageCount/* SY <-- */)
+            updateChapterProgress(selectedChapter, page/* SY --> */, viewedPageLastIndex/* SY <-- */)
         }
 
         if (selectedChapter != getCurrentChapter()) {
@@ -704,7 +704,7 @@ class ReaderViewModel @JvmOverloads constructor(
     private suspend fun updateChapterProgress(
         readerChapter: ReaderChapter,
         page: Page/* SY --> */,
-        pageCount: Int, /* SY <-- */
+        viewedPageLastIndex: Int, /* SY <-- */
     ) {
         val pageIndex = page.index
         val syncTriggerOpt = syncPreferences.getSyncTriggerOptions()
@@ -720,9 +720,11 @@ class ReaderViewModel @JvmOverloads constructor(
             readerChapter.chapter.last_page_read = pageIndex
 
             // SY -->
-            if (
-                page.index + pageCount - 1 >= (readerChapter.pages?.lastIndex ?: Int.MAX_VALUE)
-            ) {
+            val lastVisiblePageIndex = readerChapter.pages
+                ?.filterNot { it.isBlacklisted }
+                ?.maxOfOrNull { it.index }
+                ?: Int.MAX_VALUE
+            if (viewedPageLastIndex >= lastVisiblePageIndex) {
                 // SY <--
                 updateChapterProgressOnComplete(readerChapter)
 
