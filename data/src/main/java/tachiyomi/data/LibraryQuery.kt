@@ -6,6 +6,8 @@ import app.cash.sqldelight.db.SqlCursor
 import app.cash.sqldelight.db.SqlDriver
 import exh.source.MERGED_SOURCE_ID
 import tachiyomi.view.LibraryView
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 private val mapper = { cursor: SqlCursor ->
     LibraryView(
@@ -45,13 +47,21 @@ private val mapper = { cursor: SqlCursor ->
         stitch_split_page_sample_rows = cursor.getLong(33)!!,
         stitch_split_page_maximum_strip_height = cursor.getLong(34)!!,
         stitch_split_page_maximum_stitch_count = cursor.getLong(35)!!,
-        totalCount = cursor.getLong(36)!!,
-        readCount = cursor.getDouble(37)!!,
-        latestUpload = cursor.getLong(38)!!,
-        chapterFetchedAt = cursor.getLong(39)!!,
-        lastRead = cursor.getLong(40)!!,
-        bookmarkCount = cursor.getDouble(41)!!,
-        categories = cursor.getString(42)!!,
+        memo = MemoColumnAdapter.decode(cursor.getBytes(36)!!),
+        totalCount = cursor.getLong(37)!!,
+        readCount = cursor.getDouble(38)!!,
+        latestUpload = cursor.getLong(39)!!,
+        chapterFetchedAt = cursor.getLong(40)!!,
+        lastRead = cursor.getLong(41)!!,
+        bookmarkCount = cursor.getDouble(42)!!,
+        categories = cursor.getString(43)!!,
+    )
+}
+
+fun getLibraryQuery(condition: String = "M.favorite = 1"): LibraryQuery {
+    return LibraryQuery(
+        Injekt.get<SqlDriver>(),
+        condition,
     )
 }
 

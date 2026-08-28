@@ -1,12 +1,14 @@
 package tachiyomi.data.manga
 
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
+import kotlinx.serialization.json.JsonObject
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.view.LibraryView
 
 object MangaMapper {
+    @Suppress("UNUSED_PARAMETER")
     fun mapManga(
         id: Long,
         source: Long,
@@ -35,7 +37,6 @@ object MangaMapper {
         lastModifiedAt: Long,
         favoriteModifiedAt: Long?,
         version: Long,
-        @Suppress("UNUSED_PARAMETER")
         isSyncing: Long,
         notes: String,
         // SY -->
@@ -50,6 +51,7 @@ object MangaMapper {
         stitchSplitPageMaximumStripHeight: Long,
         stitchSplitPageMaximumStitchCount: Long,
         // SY <--
+        memo: JsonObject,
     ): Manga = Manga(
         id = id,
         source = source,
@@ -89,6 +91,7 @@ object MangaMapper {
         stitchSplitPageMaximumStripHeight = stitchSplitPageMaximumStripHeight.toInt(),
         stitchSplitPageMaximumStitchCount = stitchSplitPageMaximumStitchCount.toInt(),
         // SY <--
+        memo = memo,
     )
 
     fun mapLibraryManga(
@@ -133,6 +136,7 @@ object MangaMapper {
         stitchSplitPageMaximumStripHeight: Long,
         stitchSplitPageMaximumStitchCount: Long,
         // SY <--
+        memo: JsonObject,
         totalCount: Long,
         readCount: Double,
         latestUpload: Long,
@@ -182,6 +186,7 @@ object MangaMapper {
             stitchSplitPageMaximumStripHeight,
             stitchSplitPageMaximumStitchCount,
             // SY <--
+            memo,
         ),
         categories = categories.split(",").map { it.toLong() },
         totalChapters = totalCount,
@@ -234,6 +239,7 @@ object MangaMapper {
         stitchSplitPageMaximumStripHeight: Long,
         stitchSplitPageMaximumStitchCount: Long,
         // SY <--
+        memo: JsonObject,
         totalCount: Long,
     ): MangaWithChapterCount = MangaWithChapterCount(
         manga = mapManga(
@@ -277,6 +283,7 @@ object MangaMapper {
             stitchSplitPageMaximumStripHeight,
             stitchSplitPageMaximumStitchCount,
             // SY <--
+            memo,
         ),
         chapterCount = totalCount,
     )
@@ -320,6 +327,7 @@ object MangaMapper {
                 stitchSplitPageMaximumStripHeight = libraryView.stitch_split_page_maximum_strip_height.toInt(),
                 stitchSplitPageMaximumStitchCount = libraryView.stitch_split_page_maximum_stitch_count.toInt(),
                 // SY <--
+                memo = libraryView.memo,
             ),
             categories = libraryView.categories.split(",").map { it.toLong() },
             totalChapters = libraryView.totalCount,
